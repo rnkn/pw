@@ -92,7 +92,7 @@ encrypt() {
 	sign "$pw_tar" > "$pw_sig"
 	unset key content
 	echo "Password added: $pw_id"
-	verify "$pw_id" "$pw_sig"
+	# verify "$pw_tar" "$pw_sig"
 }
 
 # decrypt(pw_id)
