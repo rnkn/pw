@@ -23,47 +23,47 @@ pw_dir="${PW_DIR:-${HOME}/.pw}"
 
 fail() { echo "$1"; exit 1; }
 
-# key_gen()
+# init()
 # create private key
 # create public key
 # returns: 0
-key_gen() {
-	echo "Generating private RSA key $private_key"
+init() {
+	echo "Generating private RSA key: $private_key"
 	openssl genpkey -algorithm RSA -aes-256-cbc > "$private_key" ||
 		fail "Private key generation failed: $private_key"
 	chmod 0400 "$private_key"
-	echo "Generating public RSA key $public_key"
+	echo "Generating public RSA key: $public_key"
 	openssl pkey -in "$private_key" "$pkey_pass_args" -pubout > "$public_key" ||
 		fail "Public key generation failed: $public_key"
 	chmod 0600 "$public_key"
 	return 0
 }
 
-# pw_gen(length)
+# generate(length)
 # returns: random password of length (default 20)
 generate() {
 	len="${1:-20}"
 	jot -rc "$len" 33 123 | rs -g0 1
 }
 
-# sign(pw_id)
+# sign(data)
 # returns: sha256 binary digest
 sign() {
 	[ -n "$PW_PASSWORD" ] && pkey_pass_args="-passin env:PW_PASSWORD"
-	pw_id="$1"
-	openssl dgst -sha256 -binary < "$pw_id" |
+	data="$1"
+	openssl dgst -sha256 -binary < "$data" |
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args
 }
 
-# verify(pw_id, pw_sig)
+# verify(data, pw_sig)
 # returns: 0
 verify() {
-	pw_id="$1"
-	pw_sig="$2"
-	[ -f "$pw_sig" ] || fail "Signature not found: $pw_sig"
-	openssl dgst -sha256 -binary < "$pw_id" |
-		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$pw_sig" >/dev/null 2>&1 ||
-		fail "Verification failure: $pw_id"
+	data="$1"
+	sig="$2"
+	[ -f "$sig" ] || fail "Signature not found: $sig"
+	openssl dgst -sha256 -binary < "$data" |
+		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$sig" >/dev/null 2>&1 ||
+		fail "Verification failure: $data"
 }
 
 # encrypt(pw_id)
@@ -133,7 +133,7 @@ main() {
 	cd "$pw_dir" || fail "\$PW_DIR not set"
 	case "$1" in
 		(init)
-			key_gen ;;
+			init ;;
 		(ls|find)
 			list "$2" ;;
 		(show)
