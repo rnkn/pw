@@ -74,19 +74,22 @@ encrypt() {
 	pw_id="$1"
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
+	pw_tar="${pw_id}.tar"
 	pw_sig="${pw_id}.sig"
+	pw_workdir="${pw_id}.work"
 	content=$(cat)
+	mkdir -p "$pw_workdir"
 	key=$(openssl rand -hex 16)
 	echo "$key" |
 		openssl pkeyutl -encrypt -inkey "$public_key" -pubin |
-		openssl base64 > "$pw_key" ||
+		openssl base64 > "${pw_workdir}/${pw_key}" ||
 		fail "Encryption failed: $pw_key"
 	echo "$content" |
-		openssl enc -pbkdf2 -aes-256-cbc -base64 -pass "pass:${key}" > "$pw_enc" ||
+		openssl enc -pbkdf2 -aes-256-cbc -base64 -pass "pass:${key}" > "${pw_workdir}/${pw_enc}" ||
 		fail "Encryption failed: $pw_enc"
-	tar -cf "$pw_id" "$pw_enc" "$pw_key"
-	rm "$pw_enc" "$pw_key"
-	sign "$pw_id" > "$pw_sig"
+	tar -cf "$pw_tar" -C "$pw_workdir" "$pw_enc" "$pw_key"
+	rm -rf "$pw_workdir"
+	sign "$pw_tar" > "$pw_sig"
 	unset key content
 	echo "Password added: $pw_id"
 	verify "$pw_id" "$pw_sig"
@@ -96,27 +99,28 @@ encrypt() {
 # returns: decrypted file contents
 decrypt() {
 	pw_id="$1"
+	pw_tar="${pw_id}.tar"
 	pw_sig="${pw_id}.sig"
-	[ -f "$pw_id" ] || fail "Password not found: $pw_id"
-	verify "$pw_id" "$pw_sig"
-	pw_tmpdir="${pw_id}.tmp"
-	mkdir -p "$pw_tmpdir"
-	tar -xf "$pw_id" -C "$pw_tmpdir"
-	pw_key="${pw_tmpdir}/${pw_id}.key"
-	pw_enc="${pw_tmpdir}/${pw_id}.enc"
+	pw_key="${pw_id}.key"
+	pw_enc="${pw_id}.enc"
+	pw_workdir="${pw_id}.work"
+	[ -f "$pw_tar" ] || fail "Password not found: $pw_id"
+	verify "$pw_tar" "$pw_sig"
+	mkdir -p "$pw_workdir"
+	tar -xf "$pw_tar" -C "$pw_workdir"
 	[ -n "$PW_PASSWORD" ] && pkey_pass_args="-passin env:PW_PASSWORD"
-	key=$(openssl base64 -d < "$pw_key" |
+	key=$(openssl base64 -d < "${pw_workdir}/${pw_key}" |
 			  openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args 2>/dev/null ||
-			  fail "Decryption failed: $pw_id")
-	openssl enc -d -pbkdf2 -aes-256-cbc -base64 -pass "pass:${key}" < "$pw_enc"
-	rm -rf "$pw_tmpdir"
+			  fail "Decryption failed: $pw_key")
+	openssl enc -d -pbkdf2 -aes-256-cbc -base64 -pass "pass:${key}" < "${pw_workdir}/${pw_enc}"
+	rm -rf "$pw_workdir"
 	unset key
 }
 
 # list(string)
 # returns: list of matching password IDs
 list() {
-	find "$pw_dir" -type f -name "*${1}*" \! -name "*.sig" | sed 's/.*\///' | sort
+	find "$pw_dir" -type f -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
 
 # passphrase()
