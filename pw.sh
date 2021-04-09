@@ -121,7 +121,7 @@ encrypt() {
 	rm -rf "$pw_workdir"
 	sign "$pw_tar"
 	unset key content
-	echo "Password added: $pw_id"
+	echo "Entry added: $pw_id"
 }
 
 # decrypt(pw_id)
@@ -132,7 +132,7 @@ decrypt() {
 	pw_sig="${pw_id}.sig"
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
-	[ -e "$pw_tar" ] || fail "Password not found: $pw_id"
+	[ -e "$pw_tar" ] || fail "Entry not found: $pw_id"
 	verify "$pw_tar" "$pw_sig"
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
