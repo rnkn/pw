@@ -17,11 +17,34 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+program=$(basename "$0")
 public_key="${PW_PUBLIC_KEY:-${HOME}/.keys/public.key}"
 private_key="${PW_PRIVATE_KEY:-${HOME}/.keys/private.key}"
 pw_dir="${PW_DIR:-${HOME}/.pw}"
 
 fail() { echo "$1"; exit 1; }
+
+usage() {
+	cat <<EOF
+usage:
+  $program init
+    initialize public/private RSA key pair:
+      $public_key
+      $private_key
+  $program ls|find [QUERY]
+    list entries matching QUERY, or all entries without QUERY
+  $program add <ENTRY>
+    add ENTRY, prompting for multiline text
+  $program show <ENTRY>
+    decrypt ENTRY
+  $program head <ENTRY>
+    decrypt ENTRY, returning only first line
+  $program generate [LENGTH]
+    generate random password of LENGTH (default 20)
+  $program passphrase
+    change private key passphrase
+EOF
+}
 
 # init()
 # create private key
