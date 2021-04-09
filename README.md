@@ -42,6 +42,13 @@ To add a generated password:
 
 	$ pw generate | pw add <ENTRY>
 
+To avoid needing to enter your private key passphrase with every
+invocation of pw, add the following aliases to your profile:
+
+	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
+	alias pw_lock="unset PW_PASSPHRASE"
+	alias pw_status='[ -n "$PW_PASSPHRASE" ]; echo $?'
+
 To import from `password-store`:
 
 	$ pw_unlock
@@ -83,13 +90,6 @@ To rotate your private key:
 	$ cd
 	$ rm -rf pwtmp
 	$ pw_lock
-
-To avoid needing to enter your private key passphrase with every
-invocation of pw, add the following aliases to your profile:
-
-	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
-	alias pw_lock="unset PW_PASSPHRASE"
-	alias pw_status='[ -n "$PW_PASSPHRASE" ]; echo $?'
 
 [1]: https://www.romanzolotarev.com/pass.html
 [2]: https://www.passwordstore.org
