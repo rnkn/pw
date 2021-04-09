@@ -165,9 +165,9 @@ main() {
 		(ls|find)		list "$2" ;;
 		(add)			encrypt "$2" ;;
 		(show)			decrypt "$2" ;;
-		(head)			decrypt "$2" | sed -n 1p ;;
+		(head)			decrypt "$2" | sed 1q ;;
 		(copy)			[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
-						decrypt "$2" | sed -n 1p | "$PW_CLIP" ;;
+						decrypt "$2" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
 		(generate)		generate "$2" ;;
 		(passphrase)	pkey_passphrase ;;
 		(*)				usage ;;
