@@ -50,7 +50,7 @@ EOF
 # create private key
 # create public key
 # returns: 0
-init() {
+pkey_init() {
 	[ -e "$private_key" ] && fail "Abort: $private_key already exists"
 	echo "Generating private RSA key: $private_key"
 	openssl genpkey -algorithm RSA -aes-256-cbc > "$private_key" ||
@@ -145,8 +145,9 @@ list() {
 	find "$pw_dir" -type f -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
 
-# passphrase()
-pw_change() {
+# pkey_passphrase()
+# returns: 0
+pkey_passphrase() {
 	key_tmp=$(mktemp)
 	chmod 600 "$private_key"
 	openssl pkey -in "$private_key" -out "$key_tmp" -aes256 &&
@@ -158,22 +159,14 @@ pw_change() {
 main() {
 	cd "$pw_dir" || fail "\$PW_DIR not set"
 	case "$1" in
-		(init)
-			init ;;
-		(ls|find)
-			list "$2" ;;
-		(show)
-			decrypt "$2" ;;
-		(head)
-			decrypt "$2" | sed -n 1p ;;
-		(generate)
-			generate "$2" ;;
-		(add)
-			encrypt "$2" ;;
-		(passphrase)
-			pw_change ;;
-		(*)
-			pw_usage ;;
+		(init)			pkey_init ;;
+		(ls|find)		list "$2" ;;
+		(show)			decrypt "$2" ;;
+		(head)			decrypt "$2" | sed -n 1p ;;
+		(generate)		generate "$2" ;;
+		(add)			encrypt "$2" ;;
+		(passphrase)	pkey_passphrase ;;
+		(*)				usage ;;
 	esac
 }
 
