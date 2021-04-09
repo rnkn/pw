@@ -39,6 +39,8 @@ usage:
     decrypt ENTRY
   $program head <ENTRY>
     decrypt ENTRY, returning only first line
+  $program copy <ENTRY>
+    decrypt and copy first line of ENTRY with ${PW_CLIP:-\$PW_CLIP}
   $program generate [LENGTH]
     generate random password of LENGTH (default 20)
   $program passphrase
@@ -161,10 +163,12 @@ main() {
 	case "$1" in
 		(init)			pkey_init ;;
 		(ls|find)		list "$2" ;;
+		(add)			encrypt "$2" ;;
 		(show)			decrypt "$2" ;;
 		(head)			decrypt "$2" | sed -n 1p ;;
+		(copy)			[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
+						decrypt "$2" | sed -n 1p | "$PW_CLIP" ;;
 		(generate)		generate "$2" ;;
-		(add)			encrypt "$2" ;;
 		(passphrase)	pkey_passphrase ;;
 		(*)				usage ;;
 	esac
