@@ -31,15 +31,13 @@ usage:
     initialize RSA key pair:
       $public_key
       $private_key
-  $program ls|find [QUERY]
+  $program ls|list|find [QUERY]
     list entries matching QUERY, or all entries without QUERY
   $program add <ENTRY>
     add ENTRY, prompting for multiline text
   $program show <ENTRY>
     decrypt ENTRY
-  $program head <ENTRY>
-    decrypt ENTRY, returning only first line
-  $program copy <ENTRY>
+  $program cp|copy <ENTRY>
     decrypt and copy first line of ENTRY with ${PW_CLIP:-\$PW_CLIP}
   $program get-<FIELD> <ENTRY>
     decrypt and return value of FIELD from ENTRY
@@ -188,11 +186,10 @@ main() {
 	cd "$pw_dir" || fail "\$PW_DIR not set"
 	case "$1" in
 		(init)			pkey_init ;;
-		(ls|find)		list "$2" ;;
+		(ls|list|find)	list "$2" ;;
 		(add)			encrypt "$2" ;;
 		(show)			decrypt "$2" ;;
-		(head)			decrypt "$2" | sed 1q ;;
-		(copy)			[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
+		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 						decrypt "$2" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
 		(get-*)			get_field "$1" "$2" ;;
 		(otp)			otp "$2" ;;

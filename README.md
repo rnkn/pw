@@ -18,26 +18,24 @@ or
 Usage
 -----
 
-	  pw init
-		initialize RSA key pair
-	  pw ls|find [QUERY]
-		list entries matching QUERY, or all entries without QUERY
-	  pw add <ENTRY>
-		add ENTRY, prompting for multiline text
-	  pw show <ENTRY>
-		decrypt ENTRY
-	  pw head <ENTRY>
-		decrypt ENTRY, returning only first line
-	  pw copy <ENTRY>
-		decrypt and copy first line of ENTRY with $PW_CLIP
-	  pw get-<FIELD> <ENTRY>
-		decrypt and return value of FIELD from ENTRY
-	  pw otp <ENTRY>
-		return TOTP for ENTRY (requires oathtool)
-	  pw generate [LENGTH]
-		generate random password of LENGTH (default 20)
-	  pw passphrase
-		change private key passphrase
+	pw init
+	  initialize RSA key pair
+	pw ls|list|find [QUERY]
+	  list entries matching QUERY, or all entries without QUERY
+	pw add <ENTRY>
+	  add ENTRY, prompting for multiline text
+	pw show <ENTRY>
+	  decrypt ENTRY
+	pw cp|copy <ENTRY>
+	  decrypt and copy first line of ENTRY with $PW_CLIP
+	pw get-<FIELD> <ENTRY>
+	  decrypt and return value of FIELD from ENTRY
+	pw otp <ENTRY>
+	  return TOTP for ENTRY (requires oathtool)
+	pw generate [LENGTH]
+	  generate random password of LENGTH (default 20)
+	pw passphrase
+	  change private key passphrase
 
 Hints
 -----
