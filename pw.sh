@@ -111,11 +111,12 @@ encrypt() {
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	key=$(openssl rand -hex 16)
 	echo "$key" |
-		openssl pkeyutl -encrypt -inkey "$public_key" -pubin |
-		openssl base64 > "${pw_workdir}/${pw_key}" ||
+		openssl pkeyutl -encrypt -inkey "$public_key" -pubin \
+				> "${pw_workdir}/${pw_key}" ||
 		fail "Encryption failed: $pw_key"
 	echo "$content" |
-		openssl enc -pbkdf2 -aes-256-cbc -base64 -pass "pass:${key}" > "${pw_workdir}/${pw_enc}" ||
+		openssl enc -pbkdf2 -aes-256-cbc -pass "pass:${key}" \
+				> "${pw_workdir}/${pw_enc}" ||
 		fail "Encryption failed: $pw_enc"
 	tar -cf "$pw_tar" -C "$pw_workdir" "$pw_enc" "$pw_key"
 	rm -rf "$pw_workdir"
@@ -137,10 +138,11 @@ decrypt() {
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
-	key=$(openssl base64 -d < "${pw_workdir}/${pw_key}" |
-			  openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args 2>/dev/null ||
+	key=$(openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args \
+				  < "${pw_workdir}/${pw_key}" 2>/dev/null ||
 			  fail "Decryption failed: $pw_key")
-	openssl enc -d -pbkdf2 -aes-256-cbc -base64 -pass "pass:${key}" < "${pw_workdir}/${pw_enc}"
+	openssl enc -d -pbkdf2 -aes-256-cbc -pass "pass:${key}" \
+			< "${pw_workdir}/${pw_enc}"
 	rm -rf "$pw_workdir"
 	unset key
 }
