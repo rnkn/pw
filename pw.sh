@@ -101,10 +101,8 @@ encrypt() {
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
 	pw_tar="${pw_id}.tar"
-	pw_sig="${pw_id}.sig"
-	pw_workdir="${pw_id}.work"
 	content=$(cat)
-	mkdir -p "$pw_workdir"
+	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	key=$(openssl rand -hex 16)
 	echo "$key" |
 		openssl pkeyutl -encrypt -inkey "$public_key" -pubin |
@@ -128,10 +126,9 @@ decrypt() {
 	pw_sig="${pw_id}.sig"
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
-	pw_workdir="${pw_id}.work"
-	[ -f "$pw_tar" ] || fail "Password not found: $pw_id"
+	[ -e "$pw_tar" ] || fail "Password not found: $pw_id"
 	verify "$pw_tar" "$pw_sig"
-	mkdir -p "$pw_workdir"
+	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	key=$(openssl base64 -d < "${pw_workdir}/${pw_key}" |
