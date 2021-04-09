@@ -60,7 +60,7 @@ To import from `password-store`:
 	$ for file in *.gpg
 	> do
 	>	entry="${file%.gpg}"
-	>	pass "$entry" | sed -E 's/^otpauth:.*secret=(.+)(&.+)?/totp: \1/' | pw add "$entry"
+	>	pass "$entry" | sed -E 's/^otpauth:.*secret=([A-Za-z2-7]+).*/totp: \1/' | pw add "$entry"
 	> done
 
 To batch edit all entries, e.g. to change an email:
