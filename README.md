@@ -30,6 +30,10 @@ Usage
 		decrypt ENTRY, returning only first line
 	  pw copy <ENTRY>
 		decrypt and copy first line of ENTRY with $PW_CLIP
+	  pw get-<FIELD> <ENTRY>
+		decrypt and return value of FIELD from ENTRY
+	  pw otp <ENTRY>
+		return TOTP for ENTRY (requires oathtool)
 	  pw generate [LENGTH]
 		generate random password of LENGTH (default 20)
 	  pw passphrase
