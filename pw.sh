@@ -74,7 +74,7 @@ generate() {
 # create signature from data
 # returns: 0
 sign() {
-	[ -n "$PW_PASSWORD" ] && pkey_pass_args="-passin env:PW_PASSWORD"
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	data="$1"
 	sig="${data}.sig"
 	openssl dgst -sha256 -binary < "$data" |
@@ -133,7 +133,7 @@ decrypt() {
 	verify "$pw_tar" "$pw_sig"
 	mkdir -p "$pw_workdir"
 	tar -xf "$pw_tar" -C "$pw_workdir"
-	[ -n "$PW_PASSWORD" ] && pkey_pass_args="-passin env:PW_PASSWORD"
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	key=$(openssl base64 -d < "${pw_workdir}/${pw_key}" |
 			  openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args 2>/dev/null ||
 			  fail "Decryption failed: $pw_key")
