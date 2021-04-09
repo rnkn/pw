@@ -37,6 +37,9 @@ To rotate your private key:
 	$ rm -rf pwtmp
 	$ pw_lock
 
-To test if the private key is "unlocked":
+To avoid needing to enter your private key passphrase with every
+invocation of pw, add the following aliases to your profile:
 
-	[ -n "$PW_PASSPHRASE" ]; echo $?
+	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
+	alias pw_lock="unset PW_PASSPHRASE"
+	alias pw_status='[ -n "$PW_PASSPHRASE" ]; echo $?'
