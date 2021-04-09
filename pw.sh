@@ -28,7 +28,7 @@ usage() {
 	cat <<EOF
 usage:
   $program init
-    initialize public/private RSA key pair:
+    initialize RSA key pair:
       $public_key
       $private_key
   $program ls|find [QUERY]
