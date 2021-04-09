@@ -71,20 +71,22 @@ generate() {
 }
 
 # sign(data)
-# returns: sha256 binary digest
+# create signature from data
+# returns: 0
 sign() {
 	[ -n "$PW_PASSWORD" ] && pkey_pass_args="-passin env:PW_PASSWORD"
 	data="$1"
+	sig="${data}.sig"
 	openssl dgst -sha256 -binary < "$data" |
-		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args
+		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$sig"
 }
 
 # verify(data, pw_sig)
 # returns: 0
 verify() {
 	data="$1"
-	sig="$2"
-	[ -f "$sig" ] || fail "Signature not found: $sig"
+	sig="${data}.sig"
+	[ -e "$sig" ] || fail "Signature not found: $sig"
 	openssl dgst -sha256 -binary < "$data" |
 		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$sig" >/dev/null 2>&1 ||
 		fail "Verification failure: $data"
@@ -113,10 +115,9 @@ encrypt() {
 		fail "Encryption failed: $pw_enc"
 	tar -cf "$pw_tar" -C "$pw_workdir" "$pw_enc" "$pw_key"
 	rm -rf "$pw_workdir"
-	sign "$pw_tar" > "$pw_sig"
+	sign "$pw_tar"
 	unset key content
 	echo "Password added: $pw_id"
-	# verify "$pw_tar" "$pw_sig"
 }
 
 # decrypt(pw_id)
