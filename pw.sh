@@ -41,6 +41,10 @@ usage:
     decrypt ENTRY, returning only first line
   $program copy <ENTRY>
     decrypt and copy first line of ENTRY with ${PW_CLIP:-\$PW_CLIP}
+  $program get-<FIELD> <ENTRY>
+    decrypt and return value of FIELD from ENTRY
+  $program otp <ENTRY>
+    return TOTP for ENTRY (requires oathtool)
   $program generate [LENGTH]
     generate random password of LENGTH (default 20)
   $program passphrase
@@ -147,6 +151,26 @@ list() {
 	find "$pw_dir" -type f -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
 
+# get_field(get-FIELD, pw_id)
+# returns: field value string
+get_field() {
+	field=$(echo "$1" | cut -d- -f2)
+	pw_id="$2"
+	decrypt "$pw_id" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
+}
+
+# otp(pw_id)
+# returns: TOTP
+otp() {
+	[ $(command -v oathtool) ] || fail "Command not found: oathtool"
+	pw_id="$1"
+	[ -e "${pw_id}.tar" ] || fail "Entry not found: $pw_id"
+	secret=$(get_field "get-totp" "$pw_id")
+	[ -n "$secret" ] || exit
+	oathtool --base32 --totp "$secret"
+	unset secret
+}
+
 # pkey_passphrase()
 # returns: 0
 pkey_passphrase() {
@@ -168,6 +192,8 @@ main() {
 		(head)			decrypt "$2" | sed 1q ;;
 		(copy)			[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 						decrypt "$2" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
+		(get-*)			get_field "$1" "$2" ;;
+		(otp)			otp "$2" ;;
 		(generate)		generate "$2" ;;
 		(passphrase)	pkey_passphrase ;;
 		(*)				usage ;;
