@@ -51,6 +51,7 @@ EOF
 # create public key
 # returns: 0
 init() {
+	[ -e "$private_key" ] && fail "Abort: $private_key already exists"
 	echo "Generating private RSA key: $private_key"
 	openssl genpkey -algorithm RSA -aes-256-cbc > "$private_key" ||
 		fail "Private key generation failed: $private_key"
