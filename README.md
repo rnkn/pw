@@ -25,7 +25,7 @@ Usage
 -----
 
 	pw init
-	  initialize RSA key pair.
+	  initialize RSA key pair
 	pw ls|list|find [QUERY]
 	  list entries matching QUERY, or all entries without QUERY
 	pw add <ENTRY>
@@ -42,6 +42,8 @@ Usage
 	  return TOTP for ENTRY (requires oathtool)
 	pw generate [LENGTH]
 	  generate random password of LENGTH (default 20)
+	pw git <ARGUMENTS>
+	  call git and pass ARGUMENTS verbatim
 	pw passphrase
 	  change private key passphrase
 

@@ -48,6 +48,8 @@ usage:
     return TOTP for ENTRY (requires oathtool)
   $program generate [LENGTH]
     generate random password of LENGTH (default 20)
+  $program git <ARGUMENTS>
+    call git and pass ARGUMENTS verbatim
   $program passphrase
     change private key passphrase
 EOF
@@ -222,7 +224,7 @@ main() {
 		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 						shift; decrypt "$@" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
 		(generate)		shift; generate "$@" ;;
-		(git)			shift; git "$@" ;;
+		(git)			"$@" ;;
 		(init)			pkey_init ;;
 		(passphrase)	pkey_passphrase ;;
 		(*)				usage ;;
