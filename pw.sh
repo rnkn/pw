@@ -172,9 +172,9 @@ get_field() {
 	decrypt "$pw_id" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
 }
 
-# otp(pw_id)
+# totp(pw_id)
 # returns: TOTP
-otp() {
+totp() {
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ $(command -v oathtool) ] || fail "Command oathtool not found"
@@ -213,16 +213,17 @@ pkey_passphrase() {
 main() {
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or \$PW_DIR not set"
 	case "$1" in
-		(init)			pkey_init ;;
-		(ls|list|find)	list "$2" ;;
-		(add)			encrypt "$2" ;;
-		(show)			decrypt "$2" ;;
+		(ls|list|find)	shift; list "$@" ;;
+		(add)			shift; encrypt "$@" ;;
+		(show)			shift; decrypt "$@" ;;
+		(edit)			shift; edit "$@" ;;
+		(get-*)			shift; get_field "$@" ;;
+		(otp)			shift; totp "$@" ;;
 		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
-						decrypt "$2" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
-		(edit)			edit "$2" ;;
-		(get-*)			get_field "$1" "$2" ;;
-		(otp)			otp "$2" ;;
-		(generate)		generate "$2" ;;
+						shift; decrypt "$@" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
+		(generate)		shift; generate "$@" ;;
+		(git)			shift; git "$@" ;;
+		(init)			pkey_init ;;
 		(passphrase)	pkey_passphrase ;;
 		(*)				usage ;;
 	esac
