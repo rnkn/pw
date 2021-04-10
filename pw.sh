@@ -36,9 +36,11 @@ usage:
   $program add <ENTRY>
     add ENTRY, prompting for multiline text
   $program show <ENTRY>
-    decrypt ENTRY
+    decrypt and show ENTRY
   $program cp|copy <ENTRY>
     decrypt and copy first line of ENTRY with ${PW_CLIP:-\$PW_CLIP}
+  $program edit <ENTRY>
+    temporarily decrypt ENTRY and edit in ${EDITOR:-\$EDITOR}
   $program get-<FIELD> <ENTRY>
     decrypt and return value of FIELD from ENTRY
   $program otp <ENTRY>
@@ -171,6 +173,20 @@ otp() {
 	unset secret
 }
 
+# edit(pw_id)
+# returns: 0
+edit() {
+	pw_id="$1"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
+	workfile=$(mktemp -t pw_work); trap "rm -f $workfile" EXIT
+	chmod 600 "$workfile"
+	decrypt "$pw_id" > "$workfile"
+	${EDITOR:-vi} "$workfile"
+	encrypt "$pw_id" < "$workfile"
+	rm "$workfile"
+}
+
 # pkey_passphrase()
 # returns: 0
 pkey_passphrase() {
@@ -191,6 +207,7 @@ main() {
 		(show)			decrypt "$2" ;;
 		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 						decrypt "$2" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
+		(edit)			edit "$2" ;;
 		(get-*)			get_field "$1" "$2" ;;
 		(otp)			otp "$2" ;;
 		(generate)		generate "$2" ;;
