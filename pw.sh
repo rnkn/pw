@@ -57,11 +57,13 @@ EOF
 # create public key
 # returns: 0
 pkey_init() {
-	[ -e "$private_key" ] && fail "Abort: $private_key already exists"
+	mkdir -p $(dirname "$private_key")
+	[ -f "$private_key" ] && fail "$private_key already exists"
 	echo "Generating private RSA key: $private_key"
 	openssl genpkey -algorithm RSA -aes-256-cbc > "$private_key" ||
 		fail "Private key generation failed: $private_key"
 	chmod 0400 "$private_key"
+	mkdir -p $(dirname "$public_key")
 	echo "Generating public RSA key: $public_key"
 	openssl pkey -in "$private_key" "$pkey_pass_args" -pubout > "$public_key" ||
 		fail "Public key generation failed: $public_key"
@@ -80,9 +82,11 @@ generate() {
 # create signature from data
 # returns: 0
 sign() {
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	data="$1"
 	sig="${data}.sig"
+	[ -n "$data" ] || fail "Missing argument"
+	[ -f "$data" ] || fail "$data not found"
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	openssl dgst -sha256 -binary < "$data" |
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$sig"
 }
@@ -92,7 +96,8 @@ sign() {
 verify() {
 	data="$1"
 	sig="${data}.sig"
-	[ -e "$sig" ] || fail "Signature not found: $sig"
+	[ -n "$data" ] || fail "Missing argument"
+	[ -f "$sig" ] || fail "$sig not found"
 	openssl dgst -sha256 -binary < "$data" |
 		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$sig" >/dev/null 2>&1 ||
 		fail "Verification failure: $data"
@@ -107,6 +112,8 @@ encrypt() {
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
 	pw_tar="${pw_id}.tar"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "$public_key" ] || fail "Public key not found"
 	content=$(cat)
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	key=$(openssl rand -hex 16)
@@ -122,7 +129,7 @@ encrypt() {
 	rm -rf "$pw_workdir"
 	sign "$pw_tar"
 	unset key content
-	echo "Entry added: $pw_id"
+	echo "Encryption succeeded: $pw_id"
 }
 
 # decrypt(pw_id)
@@ -133,11 +140,13 @@ decrypt() {
 	pw_sig="${pw_id}.sig"
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
-	[ -e "$pw_tar" ] || fail "Entry not found: $pw_id"
+	[ -f "$private_key" ] || fail "Private key not found"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "$pw_tar" ] || fail "$pw_id not found"
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	verify "$pw_tar" "$pw_sig"
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	key=$(openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args \
 				  < "${pw_workdir}/${pw_key}" 2>/dev/null ||
 			  fail "Decryption failed: $pw_key")
@@ -150,7 +159,8 @@ decrypt() {
 # list(string)
 # returns: list of matching password IDs
 list() {
-	find "$pw_dir" -type f -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
+	[ -d "$pw_dir" ] || fail "$pw_dir not found"
+	find "$pw_dir" -type f -depth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
 
 # get_field(get-FIELD, pw_id)
@@ -164,9 +174,10 @@ get_field() {
 # otp(pw_id)
 # returns: TOTP
 otp() {
-	[ $(command -v oathtool) ] || fail "Command not found: oathtool"
 	pw_id="$1"
-	[ -e "${pw_id}.tar" ] || fail "Entry not found: $pw_id"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ $(command -v oathtool) ] || fail "Command oathtool not found"
+	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
 	secret=$(get_field "get-totp" "$pw_id")
 	[ -n "$secret" ] || exit
 	oathtool --base32 --totp "$secret"
