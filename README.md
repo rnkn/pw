@@ -17,6 +17,10 @@ or
 
 	$ make PREFIX=$HOME/bin install
 
+n.b. While you are free to use this code, I encourage you to do what I did and
+write your password manager from scratch, which will give you a thorough
+understanding of how your password data is managed.
+
 Usage
 -----
 
@@ -44,9 +48,9 @@ Usage
 Hints
 -----
 
-To avoid needing to enter your private key passphrase with every
-invocation of pw, set the `PW_PASSPHRASE` environment variable. For
-convenience, add the following aliases to your profile:
+To avoid needing to enter your private key passphrase with every invocation of
+pw, set the `PW_PASSPHRASE` environment variable. For convenience, add the
+following aliases to your profile:
 
 	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
 	alias pw_lock="unset PW_PASSPHRASE"
