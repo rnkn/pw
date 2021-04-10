@@ -6,9 +6,11 @@ pw is a fork/rewrite of Roman Zolotarev's POSIX shell [pass utility][1].
 I've used a new name to avoid confusion with the more well-known
 [pass][2], it's 50% quicker to type, and also because it's my initials.
 
-Installing
-----------
+Installation
+------------
 
+	$ git clone git://git.bydasein.com/pw
+	$ cd pw
 	# make install
 
 or
@@ -42,10 +44,6 @@ Usage
 Hints
 -----
 
-To add a generated password:
-
-	$ pw generate | pw add <ENTRY>
-
 To avoid needing to enter your private key passphrase with every
 invocation of pw, set the `PW_PASSPHRASE` environment variable. For
 convenience, add the following aliases to your profile:
@@ -53,6 +51,10 @@ convenience, add the following aliases to your profile:
 	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
 	alias pw_lock="unset PW_PASSPHRASE"
 	alias pw_status='[ -n "$PW_PASSPHRASE" ]; echo $?'
+
+To add a generated password:
+
+	$ pw generate | pw add <ENTRY>
 
 To import from `password-store`:
 
