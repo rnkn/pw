@@ -47,7 +47,8 @@ To add a generated password:
 	$ pw generate | pw add <ENTRY>
 
 To avoid needing to enter your private key passphrase with every
-invocation of pw, add the following aliases to your profile:
+invocation of pw, set the `PW_PASSPHRASE` environment variable. For
+convenience, add the following aliases to your profile:
 
 	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
 	alias pw_lock="unset PW_PASSPHRASE"
