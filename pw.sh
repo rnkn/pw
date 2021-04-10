@@ -210,7 +210,7 @@ pkey_passphrase() {
 }
 
 main() {
-	cd "$pw_dir" || fail "\$PW_DIR not set"
+	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or \$PW_DIR not set"
 	case "$1" in
 		(init)			pkey_init ;;
 		(ls|list|find)	list "$2" ;;
