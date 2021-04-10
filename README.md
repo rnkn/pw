@@ -1,7 +1,7 @@
 pw
 ==
 
-pw is a fork/rewrite of Roman Zolotarev's POSIX shell [pass utility][1].
+pw is a rewrite of Roman Zolotarev's POSIX shell password manager [pass][1].
 
 I've used a new name to avoid confusion with the more well-known
 [pass][2], it's 50% quicker to type, and also because it's my initials.
