@@ -19,15 +19,17 @@ Usage
 -----
 
 	pw init
-	  initialize RSA key pair
+	  initialize RSA key pair.
 	pw ls|list|find [QUERY]
 	  list entries matching QUERY, or all entries without QUERY
 	pw add <ENTRY>
 	  add ENTRY, prompting for multiline text
 	pw show <ENTRY>
-	  decrypt ENTRY
+	  decrypt and show ENTRY
 	pw cp|copy <ENTRY>
 	  decrypt and copy first line of ENTRY with $PW_CLIP
+	pw edit <ENTRY>
+	  temporarily decrypt ENTRY and edit in $EDITOR
 	pw get-<FIELD> <ENTRY>
 	  decrypt and return value of FIELD from ENTRY
 	pw otp <ENTRY>
