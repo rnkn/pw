@@ -92,7 +92,7 @@ To rotate your private key:
 	$ cd pwtmp
 	$ for entry in *.txt
 	> do
-	>	cat "$entry" | pw add "${entry%.txt}"
+	>	pw add "${entry%.txt}" < "$entry"
 	> done
 	$ cd
 	$ rm -rf pwtmp
