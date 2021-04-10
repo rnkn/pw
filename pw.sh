@@ -191,7 +191,6 @@ edit() {
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
 	workfile=$(mktemp -t pw_work); trap "rm -f $workfile" EXIT
-	chmod 600 "$workfile"
 	decrypt "$pw_id" > "$workfile"
 	${EDITOR:-vi} "$workfile"
 	encrypt "$pw_id" < "$workfile"
@@ -201,12 +200,13 @@ edit() {
 # pkey_passphrase()
 # returns: 0
 pkey_passphrase() {
-	key_tmp=$(mktemp)
-	chmod 600 "$private_key"
-	openssl pkey -in "$private_key" -out "$key_tmp" -aes256 &&
-		mv "$key_tmp" "$private_key" ||
-			fail "Error changing passphrase for $private_key"
-	chmod 400 "$private_key"
+	[ -f "$private_key" ] || fail "Private key not found"
+	workkey=$(mktemp -t pw_work); trap "rm -f $workkey" EXIT
+	chmod 0600 "$private_key"
+	openssl pkey -in "$private_key" -out "$workkey" -aes256 &&
+		mv "$workkey" "$private_key" ||
+			fail "Error changing passphrase: $private_key"
+	chmod 0400 "$private_key"
 }
 
 main() {
