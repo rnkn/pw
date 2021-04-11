@@ -243,6 +243,7 @@ main() {
 		(edit)			shift; edit "$@" ;;
 		(otp)			shift; totp "$@" ;;
 		(sign)			shift; sign "$@" ;;
+		(verify)		shift; verify "$@" ;;
 		(generate)		shift; generate "$@" ;;
 		(get-*)			get_field "$@" ;;
 		(git)			"$@" ;;
