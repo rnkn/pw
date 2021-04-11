@@ -19,8 +19,8 @@
 # This code is a rewrite of pass, copyright (c) 2018-2019 Roman Zolotarev.
 
 program=$(basename "$0")
-public_key="${PW_PUBLIC_KEY:-${HOME}/.keys/public.key}"
-private_key="${PW_PRIVATE_KEY:-${HOME}/.keys/private.key}"
+public_key="${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}"
+private_key="${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}"
 pw_dir="${PW_DIR:-${HOME}/.pw}"
 
 fail() { echo "$1"; exit 1; }
