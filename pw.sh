@@ -164,7 +164,7 @@ decrypt() {
 # returns: list of matching password IDs
 list() {
 	[ -d "$pw_dir" ] || fail "$pw_dir not found"
-	find "$pw_dir" -type f -depth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
+	find "$pw_dir" -type f -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
 
 # get_field(get-FIELD, pw_id)
