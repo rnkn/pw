@@ -60,6 +60,7 @@ EOF
 # create public key
 # returns: 0
 pkey_init() {
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	mkdir -p $(dirname "$private_key")
 	[ -f "$private_key" ] && fail "$private_key already exists"
 	echo "Generating private RSA key: $private_key"
