@@ -48,6 +48,8 @@ usage:
     return TOTP for ENTRY (requires oathtool)
   $program generate [LENGTH]
     generate random password of LENGTH (default 20)
+  $program sign <ENTRY>
+    recreate signature for ENTRY with private key
   $program git <ARGUMENTS>
     call git and pass ARGUMENTS verbatim
   $program passphrase
@@ -86,13 +88,14 @@ generate() {
 # create signature from data
 # returns: 0
 sign() {
-	data="$1"
-	sig="${data}.sig"
-	[ -n "$data" ] || fail "Missing argument"
-	[ -f "$data" ] || fail "$data not found"
+	pw_id="$1"
+	pw_tar="${1}.tar"
+	pw_sig="${pw_tar}.sig"
+	[ -n "$pw_tar" ] || fail "Missing argument"
+	[ -f "$pw_tar" ] || fail "$pw_tar not found"
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
-	openssl dgst -sha256 -binary < "$data" |
-		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$sig"
+	openssl dgst -sha256 -binary < "$pw_tar" |
+		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
 }
 
 # verify(data, pw_sig)
@@ -131,7 +134,7 @@ encrypt() {
 		fail "Encryption failed: $pw_enc"
 	tar -cf "$pw_tar" -C "$pw_workdir" "$pw_enc" "$pw_key"
 	rm -rf "$pw_workdir"
-	sign "$pw_tar"
+	sign "$pw_id"
 	unset key content
 	echo "Encryption succeeded: $pw_id"
 }
@@ -221,6 +224,7 @@ main() {
 		(show)			shift; decrypt "$@" ;;
 		(edit)			shift; edit "$@" ;;
 		(otp)			shift; totp "$@" ;;
+		(sign)			shift; sign "$@" ;;
 		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 						shift; decrypt "$@" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
 		(generate)		shift; generate "$@" ;;
