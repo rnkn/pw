@@ -220,11 +220,11 @@ main() {
 		(add)			shift; encrypt "$@" ;;
 		(show)			shift; decrypt "$@" ;;
 		(edit)			shift; edit "$@" ;;
-		(get-*)			shift; get_field "$@" ;;
 		(otp)			shift; totp "$@" ;;
 		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 						shift; decrypt "$@" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
 		(generate)		shift; generate "$@" ;;
+		(get-*)			get_field "$@" ;;
 		(git)			"$@" ;;
 		(init)			pkey_init ;;
 		(passphrase)	pkey_passphrase ;;
