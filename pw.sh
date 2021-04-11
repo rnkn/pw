@@ -91,8 +91,8 @@ sign() {
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
-	[ -n "$pw_tar" ] || fail "Missing argument"
-	[ -f "$pw_tar" ] || fail "$pw_tar not found"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "$pw_tar" ] || fail "$pw_id not found"
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	openssl dgst -sha256 -binary < "$pw_tar" |
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
@@ -101,13 +101,15 @@ sign() {
 # verify(data, pw_sig)
 # returns: 0
 verify() {
-	data="$1"
-	sig="${data}.sig"
-	[ -n "$data" ] || fail "Missing argument"
-	[ -f "$sig" ] || fail "$sig not found"
-	openssl dgst -sha256 -binary < "$data" |
-		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$sig" >/dev/null 2>&1 ||
-		fail "Verification failure: $data"
+	pw_id="$1"
+	pw_tar="${1}.tar"
+	pw_sig="${pw_tar}.sig"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "$pw_tar" ] || fail "$pw_id not found"
+	[ -f "$pw_sig" ] || fail "$pw_id signature not found"
+	openssl dgst -sha256 -binary < "$pw_tar" |
+		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$pw_sig" >/dev/null 2>&1 ||
+		fail "Verification failure: $pw_id"
 }
 
 # encrypt(pw_id)
@@ -144,14 +146,15 @@ encrypt() {
 decrypt() {
 	pw_id="$1"
 	pw_tar="${pw_id}.tar"
-	pw_sig="${pw_id}.sig"
+	pw_sig="${pw_tar}.sig"
 	pw_key="${pw_id}.key"
 	pw_enc="${pw_id}.enc"
 	[ -f "$private_key" ] || fail "Private key not found"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "$pw_tar" ] || fail "$pw_id not found"
+	[ -f "$pw_sig" ] || fail "$pw_id signature not found"
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
-	verify "$pw_tar" "$pw_sig"
+	verify "$pw_id"
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
 	key=$(openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args \
@@ -168,6 +171,20 @@ decrypt() {
 list() {
 	[ -d "$pw_dir" ] || fail "$pw_dir not found"
 	find "$pw_dir" -type f -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
+}
+
+# copy(pw_id)
+# copies first line to clipboard
+# returns: 0
+copy() {
+	[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
+	pw_id="$1"
+	pw_tar="${pw_id}.tar"
+	pw_sig="${pw_tar}.sig"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "$pw_tar" ] || fail "$pw_id not found"
+	[ -f "$pw_sig" ] || fail "$pw_id signature not found"
+	decrypt "$pw_id" | sed 1q | tr -d \\n | "$PW_CLIP"
 }
 
 # get_field(get-FIELD, pw_id)
@@ -222,11 +239,10 @@ main() {
 		(ls|list|find)	shift; list "$@" ;;
 		(add)			shift; encrypt "$@" ;;
 		(show)			shift; decrypt "$@" ;;
+		(cp|copy)	    shift; copy "$@" ;;
 		(edit)			shift; edit "$@" ;;
 		(otp)			shift; totp "$@" ;;
 		(sign)			shift; sign "$@" ;;
-		(cp|copy)		[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
-						shift; decrypt "$@" | sed 1q | tr -d \\n | "$PW_CLIP" ;;
 		(generate)		shift; generate "$@" ;;
 		(get-*)			get_field "$@" ;;
 		(git)			"$@" ;;
