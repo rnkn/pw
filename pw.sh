@@ -66,16 +66,17 @@ EOF
 # create public key
 # returns: 0
 pkey_init() {
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	mkdir -p "$(dirname $private_key)"
 	[ -f "$private_key" ] && fail "$private_key already exists"
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-pass env:PW_PASSPHRASE"
 	echo "Generating private RSA key: $private_key"
-	openssl genpkey -algorithm RSA -aes-256-cbc > "$private_key" ||
+	openssl genpkey -algorithm RSA -aes-256-cbc $pkey_pass_args > "$private_key" ||
 		fail "Private key generation failed: $private_key"
 	chmod 0400 "$private_key"
 	mkdir -p "$(dirname $public_key)"
+	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	echo "Generating public RSA key: $public_key"
-	openssl pkey -in "$private_key" "$pkey_pass_args" -pubout > "$public_key" ||
+	openssl pkey -in "$private_key" $pkey_pass_args -pubout > "$public_key" ||
 		fail "Public key generation failed: $public_key"
 	chmod 0600 "$public_key"
 	return 0
