@@ -211,6 +211,7 @@ copy() {
 	else
 		echo "$return" | sed 1q | tr -d \\n | "$PW_CLIP"
 	fi
+	unset return
 }
 
 # get_field(get-FIELD, pw_id)
@@ -224,6 +225,7 @@ get_field() {
 	else
 		echo "$return" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
 	fi
+	unset return
 }
 
 # totp(pw_id)
@@ -255,6 +257,7 @@ edit() {
 	${EDITOR:-vi} "$workfile"
 	encrypt "$pw_id" < "$workfile"
 	rm "$workfile"
+	unset return
 }
 
 # pkey_passphrase()
