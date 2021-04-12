@@ -82,34 +82,30 @@ To import from `password-store`:
 To batch edit all entries, e.g. to change an email:
 
 	$ pw_unlock
-	$ for entry in $(pw ls)
+	$ pw ls | while read -r entry
 	> do
 	>	pw show "$entry" | sed 's/@example\.com/@newaddress.com/' | pw add "$entry"
 	> done
-	$ pw_lock
 
 To rotate your private key:
 
-	$ pw_unlock
-	$ mkdir pwtmp
-	$ for entry in $(pw ls)
-	> do
-	>	pw show "$entry" > "pwtmp/${entry}.txt"
-	> done
 	$ tar -cvf keybackup.tar $HOME/.keys
-	$ rm -rf $HOME/.keys
-	$ tar -cvf pwbackup.tar $HOME/.pw
-	$ rm -rf $HOME/.pw
-	$ pw init
+	$ PW_PRIVATE_KEY=$HOME/.keys/newkey.sec \
+	> PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \
+	> pw init
+	$ mkdir $HOME/.pw_new
 	$ pw_unlock
-	$ cd pwtmp
-	$ for entry in *.txt
+	$ pw ls | while read -r entry
 	> do
-	>	pw add "${entry%.txt}" < "$entry"
+	>	pw show "$entry" |
+	>		PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \
+	>		PW_DIR=$HOME/.pw_new
+	>		pw add "$entry"
 	> done
-	$ cd
-	$ rm -rf pwtmp
-	$ pw_lock
+	$ mv $HOME/.keys/newkey.sec $HOME/.keys/key.sec
+	$ mv $HOME/.keys/newkey.pub $HOME/.keys/key.pub
+	$ rm -rf $HOME/.pw
+	$ mv $HOME/.pw_new $HOME/.pw
 
 [1]: https://www.romanzolotarev.com/pass.html
 [2]: https://www.passwordstore.org
