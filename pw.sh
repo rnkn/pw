@@ -205,7 +205,7 @@ copy() {
 	pw_id="$1"
 	[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 	return=$(decrypt "$pw_id")
-	if [ $? -gt 0 ]; then
+	if [ $? -ne 0 ]; then
 		fail "$return"
 	else
 		echo "$return" | sed 1q | tr -d \\n | "$PW_CLIP"
@@ -218,7 +218,7 @@ get_field() {
 	field=$(echo "$1" | cut -d- -f2)
 	pw_id="$2"
 	return=$(decrypt "$pw_id")
-	if [ $? -gt 0 ]; then
+	if [ $? -ne 0 ]; then
 		fail "$return"
 	else
 		echo "$return" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
@@ -246,7 +246,7 @@ edit() {
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
 	workfile=$(mktemp -t pw_work); trap "rm -f $workfile" EXIT
 	return=$(decrypt "$pw_id")
-	if [ $? -gt 0 ]; then
+	if [ $? -ne 0 ]; then
 		fail "$return"
 	else
 		echo "$return" > "$workfile"
