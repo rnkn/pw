@@ -107,11 +107,11 @@ To rotate your private key:
 	> do
 	>	pw show "$entry" |
 	>		PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \
-	>		PW_DIR=$HOME/.pw_new
+	>		PW_DIR=$HOME/.pw_new \
 	>		pw add "$entry"
 	> done
-	$ mv $HOME/.keys/newkey.sec $HOME/.keys/key.sec
-	$ mv $HOME/.keys/newkey.pub $HOME/.keys/key.pub
+	$ mv $HOME/.keys/{newkey,key}.sec
+	$ mv $HOME/.keys/{newkey,key}.pub
 	$ rm -rf $HOME/.pw
 	$ mv $HOME/.pw_new $HOME/.pw
 
