@@ -136,7 +136,7 @@ encrypt() {
 		fail "Encryption failed: $pw_enc"
 	tar -cf "$pw_tar" -C "$pw_workdir" "$pw_enc" "$pw_key"
 	rm -rf "$pw_workdir"
-	sign "$pw_id"
+	[ -n "$PW_SIGN" ] && sign "$pw_id"
 	unset key content
 	echo "Encryption succeeded: $pw_id"
 }
@@ -146,15 +146,17 @@ encrypt() {
 decrypt() {
 	pw_id="$1"
 	pw_tar="${pw_id}.tar"
-	pw_sig="${pw_tar}.sig"
-	pw_key="${pw_id}.key"
-	pw_enc="${pw_id}.enc"
 	[ -f "$private_key" ] || fail "Private key not found"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "$pw_tar" ] || fail "$pw_id not found"
-	[ -f "$pw_sig" ] || fail "$pw_id signature not found"
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
-	verify "$pw_id"
+	if [ -n "$PW_VERIFY" ]; then
+		pw_sig="${pw_tar}.sig"
+		[ -f "$pw_sig" ] || fail "$pw_id signature not found"
+		verify "$pw_id"
+	fi
+	pw_key="${pw_id}.key"
+	pw_enc="${pw_id}.enc"
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
 	key=$(openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args \
@@ -177,14 +179,14 @@ list() {
 # copies first line to clipboard
 # returns: 0
 copy() {
-	[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
 	pw_id="$1"
-	pw_tar="${pw_id}.tar"
-	pw_sig="${pw_tar}.sig"
-	[ -n "$pw_id" ] || fail "Missing argument"
-	[ -f "$pw_tar" ] || fail "$pw_id not found"
-	[ -f "$pw_sig" ] || fail "$pw_id signature not found"
-	decrypt "$pw_id" | sed 1q | tr -d \\n | "$PW_CLIP"
+	[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
+	return=$(decrypt "$pw_id")
+	if [ $? -gt 0 ]; then
+		fail "$return"
+	else
+		echo "$return" | sed 1q | tr -d \\n | "$PW_CLIP"
+	fi
 }
 
 # get_field(get-FIELD, pw_id)
@@ -192,7 +194,12 @@ copy() {
 get_field() {
 	field=$(echo "$1" | cut -d- -f2)
 	pw_id="$2"
-	decrypt "$pw_id" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
+	return=$(decrypt "$pw_id")
+	if [ $? -gt 0 ]; then
+		fail "$return"
+	else
+		echo "$return" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
+	fi
 }
 
 # totp(pw_id)
@@ -215,7 +222,12 @@ edit() {
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
 	workfile=$(mktemp -t pw_work); trap "rm -f $workfile" EXIT
-	decrypt "$pw_id" > "$workfile"
+	return=$(decrypt "$pw_id")
+	if [ $? -gt 0 ]; then
+		fail "$return"
+	else
+		echo "$return" > "$workfile"
+	fi
 	${EDITOR:-vi} "$workfile"
 	encrypt "$pw_id" < "$workfile"
 	rm "$workfile"
