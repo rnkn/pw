@@ -35,9 +35,9 @@ Usage
 	pw show <ENTRY>
 	  decrypt and show ENTRY
 	pw cp|copy <ENTRY>
-	  decrypt and send first line of ENTRY to pbcopy
+	  decrypt and send first line of ENTRY to $PW_CLIP
 	pw edit <ENTRY>
-	  temporarily decrypt ENTRY and edit in vi
+	  temporarily decrypt ENTRY and edit in $EDITOR
 	pw get-<FIELD> <ENTRY>
 	  decrypt ENTRY and return value of FIELD
 	pw otp <ENTRY>
