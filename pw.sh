@@ -236,7 +236,7 @@ totp() {
 	[ "$(command -v oathtool)" ] || fail "Command oathtool not found"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
 	secret=$(get_field "get-totp" "$pw_id")
-	[ -n "$secret" ] || exit
+	[ -n "$secret" ] || fail "Missing TOTP secret: $pw_id"
 	oathtool --base32 --totp "$secret"
 	unset secret
 }
