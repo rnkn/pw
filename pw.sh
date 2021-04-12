@@ -178,10 +178,11 @@ decrypt() {
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
 	tar -xf "$pw_tar" -C "$pw_workdir"
 	key=$(openssl pkeyutl -decrypt -inkey "$private_key" $pkey_pass_args \
-				  < "${pw_workdir}/${pw_key}" 2>/dev/null ||
+				  < "${pw_workdir}/${pw_key}" ||
 			  fail "Decryption failed: $pw_key")
 	openssl enc -d -pbkdf2 -aes-256-cbc -pass "pass:${key}" \
-			< "${pw_workdir}/${pw_enc}"
+			< "${pw_workdir}/${pw_enc}" ||
+		fail "Decryption failed: $pw_enc"
 	rm -rf "$pw_workdir"
 	unset key
 }
