@@ -67,13 +67,13 @@ EOF
 # returns: 0
 pkey_init() {
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
-	mkdir -p $(dirname "$private_key")
+	mkdir -p "$(dirname $private_key)"
 	[ -f "$private_key" ] && fail "$private_key already exists"
 	echo "Generating private RSA key: $private_key"
 	openssl genpkey -algorithm RSA -aes-256-cbc > "$private_key" ||
 		fail "Private key generation failed: $private_key"
 	chmod 0400 "$private_key"
-	mkdir -p $(dirname "$public_key")
+	mkdir -p "$(dirname $public_key)"
 	echo "Generating public RSA key: $public_key"
 	openssl pkey -in "$private_key" "$pkey_pass_args" -pubout > "$public_key" ||
 		fail "Public key generation failed: $public_key"
@@ -230,7 +230,7 @@ get_field() {
 totp() {
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
-	[ $(command -v oathtool) ] || fail "Command oathtool not found"
+	[ "$(command -v oathtool)" ] || fail "Command oathtool not found"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
 	secret=$(get_field "get-totp" "$pw_id")
 	[ -n "$secret" ] || exit
