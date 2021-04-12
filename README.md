@@ -26,26 +26,33 @@ Usage
 
 	pw init
 	  initialize RSA key pair
+	pw config
+	  print PW_* variables (passphrase hidden)
 	pw ls|list|find [QUERY]
-	  list entries matching QUERY, or all entries without QUERY
+	  list entries matching QUERY; without QUERY, list all
 	pw add <ENTRY>
 	  add ENTRY, prompting for multiline text
 	pw show <ENTRY>
 	  decrypt and show ENTRY
 	pw cp|copy <ENTRY>
-	  decrypt and copy first line of ENTRY with $PW_CLIP
+	  decrypt and send first line of ENTRY to pbcopy
 	pw edit <ENTRY>
-	  temporarily decrypt ENTRY and edit in $EDITOR
+	  temporarily decrypt ENTRY and edit in vi
 	pw get-<FIELD> <ENTRY>
-	  decrypt and return value of FIELD from ENTRY
+	  decrypt ENTRY and return value of FIELD
 	pw otp <ENTRY>
 	  return TOTP for ENTRY (requires oathtool)
 	pw generate [LENGTH]
 	  generate random password of LENGTH (default 20)
+	pw sign <ENTRY>
+	  create signature for ENTRY with private key
+	pw verify <ENTRY>
+	  verify ENTRY against signature with public key
 	pw git <ARGUMENTS>
 	  call git and pass ARGUMENTS verbatim
 	pw passphrase
 	  change private key passphrase
+
 
 Hints
 -----

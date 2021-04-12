@@ -32,24 +32,28 @@ usage:
     initialize RSA key pair:
       $public_key
       $private_key
+  $program config
+    print PW_* variables (passphrase hidden)
   $program ls|list|find [QUERY]
-    list entries matching QUERY, or all entries without QUERY
+    list entries matching QUERY; without QUERY, list all
   $program add <ENTRY>
     add ENTRY, prompting for multiline text
   $program show <ENTRY>
     decrypt and show ENTRY
   $program cp|copy <ENTRY>
-    decrypt and copy first line of ENTRY with ${PW_CLIP:-\$PW_CLIP}
+    decrypt and send first line of ENTRY to ${PW_CLIP:-\$PW_CLIP}
   $program edit <ENTRY>
     temporarily decrypt ENTRY and edit in ${EDITOR:-\$EDITOR}
   $program get-<FIELD> <ENTRY>
-    decrypt and return value of FIELD from ENTRY
+    decrypt ENTRY and return value of FIELD
   $program otp <ENTRY>
     return TOTP for ENTRY (requires oathtool)
   $program generate [LENGTH]
     generate random password of LENGTH (default 20)
   $program sign <ENTRY>
-    recreate signature for ENTRY with private key
+    create signature for ENTRY with private key
+  $program verify <ENTRY>
+    verify ENTRY against signature with public key
   $program git <ARGUMENTS>
     call git and pass ARGUMENTS verbatim
   $program passphrase
