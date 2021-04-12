@@ -77,6 +77,24 @@ pkey_init() {
 	return 0
 }
 
+config() {
+	[ -n "$PW_PASSPHRASE" ] && pass="***" || pass="-"
+	[ -n "$PW_SIGN" ] || PW_SIGN="-"
+	[ -n "$PW_VERIFY" ] || PW_VERIFY="-"
+	[ -n "$PW_CLIP" ] || PW_CLIP="-"
+	config=$(cat <<EOF
+PW_PUBLIC_KEY:${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}
+PW_PRIVATE_KEY:${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}
+PW_DIR:${PW_DIR:-${HOME}/.pw}
+PW_PASSPHRASE:$pass
+PW_SIGN:$PW_SIGN
+PW_VERIFY:$PW_VERIFY
+PW_CLIP:$PW_CLIP
+EOF
+)
+	echo "$config" | column -ts:
+}
+
 # generate(length)
 # returns: random password of length (default 20)
 generate() {
@@ -261,6 +279,7 @@ main() {
 		(git)			"$@" ;;
 		(init)			pkey_init ;;
 		(passphrase)	pkey_passphrase ;;
+		(config)		config ;;
 		(*)				usage ;;
 	esac
 }
