@@ -1,13 +1,27 @@
-pw
-==
+pw - POSIX shell password manager
+=================================
 
 pw is a rewrite of Roman Zolotarev's POSIX shell password manager [pass][1].
 
 I've used a new name to avoid confusion with the more well-known
 [pass][2], it's 50% quicker to type, and also because it's my initials.
 
+
+Requirements
+------------
+
+- `openssl` handles all encryption processes
+- `oathtool` is required for generating TOTPs
+
+
 Installation
 ------------
+
+The first step is to read and understand the source. I encourage you not to
+encrypt your password data using a program you do not understand. (As a
+fail-safe, pw requires its default directories to be manually created.)
+
+After that:
 
 	$ git clone git://git.bydasein.com/pw
 	$ cd pw
@@ -17,9 +31,6 @@ or
 
 	$ make PREFIX=$HOME/bin install
 
-n.b. While you are free to use this code, I encourage you to do what I did and
-write your password manager from scratch, which will give you a thorough
-understanding of how your password data is managed.
 
 Usage
 -----
@@ -70,6 +81,36 @@ For convenience, add the following aliases to your profile:
 	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
 	alias pw_lock="unset PW_PASSPHRASE"
 
+
+How it works
+------------
+
+pw uses hybrid encryption, which combines the strengths of RSA asymmetric
+encryption with AES symmetric encryption.
+
+For example, adding a password for `example.com` generates an encryption key and
+the password content is then encrypted with this key using AES-256-CBC
+encryption, as `example.com.enc`. The key is then encrypted using your RSA
+public key as `example.com.key` and the original key discarded. Both
+`example.com.enc` and `example.com.key` are added to a tarball
+`example.com.tar`, and an optional signed hash `example.com.tar.sig` is
+generated using your RSA private key.
+
+This is the resulting hierarchy:
+
+	.PW_DIR/
+	├── example.com.tar
+	│   ├── example.com.enc
+	│   └── example.com.key
+	└── example.com.tar.sig
+
+
+Bugs
+----
+
+Please email patches to the address in the source.
+
+
 Hints
 -----
 
@@ -114,6 +155,7 @@ To rotate your private key:
 	$ mv $HOME/.keys/{newkey,key}.pub
 	$ rm -rf $HOME/.pw
 	$ mv $HOME/.pw_new $HOME/.pw
+
 
 [1]: https://www.romanzolotarev.com/pass.html
 [2]: https://www.passwordstore.org
