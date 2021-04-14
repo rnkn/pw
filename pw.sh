@@ -77,7 +77,6 @@ pkey_init() {
 	openssl pkey -in "$private_key" $pkey_pass_args -pubout > "$public_key" ||
 		fail "Public key generation failed: $public_key"
 	chmod 0600 "$public_key"
-	return 0
 }
 
 config() {
@@ -155,10 +154,10 @@ encrypt() {
 		openssl enc -pbkdf2 -aes-256-cbc -pass "pass:${key}" \
 				> "${pw_workdir}/${pw_enc}" ||
 		fail "Encryption failed: $pw_enc"
+	unset key content
 	tar -cf "$pw_tar" -C "$pw_workdir" "$pw_enc" "$pw_key"
 	rm -rf "$pw_workdir"
 	[ -n "$PW_SIGN" ] && sign "$pw_id"
-	unset key content
 	echo "Encryption succeeded: $pw_id"
 }
 
@@ -186,8 +185,8 @@ decrypt() {
 	openssl enc -d -pbkdf2 -aes-256-cbc -pass "pass:${key}" \
 			< "${pw_workdir}/${pw_enc}" ||
 		fail "Decryption failed: $pw_enc"
-	rm -rf "$pw_workdir"
 	unset key
+	rm -rf "$pw_workdir"
 }
 
 # list(string)
@@ -208,8 +207,8 @@ copy() {
 		fail "$return"
 	else
 		echo "$return" | sed 1q | tr -d \\n | "$PW_CLIP"
+		unset return
 	fi
-	unset return
 }
 
 # get_field(get-FIELD, pw_id)
@@ -222,8 +221,8 @@ get_field() {
 		fail "$return"
 	else
 		echo "$return" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
+		unset return
 	fi
-	unset return
 }
 
 # totp(pw_id)
@@ -251,11 +250,11 @@ edit() {
 		fail "$return"
 	else
 		echo "$return" > "$workfile"
+		unset return
+		${EDITOR:-vi} "$workfile"
+		encrypt "$pw_id" < "$workfile"
 	fi
-	${EDITOR:-vi} "$workfile"
-	encrypt "$pw_id" < "$workfile"
 	rm "$workfile"
-	unset return
 }
 
 # pkey_passphrase()
@@ -276,7 +275,7 @@ main() {
 		(ls|list|find)	shift; list "$@" ;;
 		(add)			shift; encrypt "$@" ;;
 		(show)			shift; decrypt "$@" ;;
-		(cp|copy)	    shift; copy "$@" ;;
+		(cp|copy)		shift; copy "$@" ;;
 		(edit)			shift; edit "$@" ;;
 		(otp)			shift; totp "$@" ;;
 		(sign)			shift; sign "$@" ;;
