@@ -118,6 +118,13 @@ To add a generated password:
 
 	$ pw generate | pw add <ENTRY>
 
+Set git to perform binary diffs:
+
+	$ cd .pw
+	$ cat > .gitattributes
+	> *.tar diff=
+	> *.tar.sig diff=
+
 To import from `password-store`:
 
 	$ pw_unlock
