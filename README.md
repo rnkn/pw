@@ -10,8 +10,8 @@ I've used a new name to avoid confusion with the more well-known
 Requirements
 ------------
 
-- `openssl` handles all encryption processes
-- `oathtool` is required for generating TOTPs
+- [`openssl`][3] handles all encryption processes
+- [`oathtool`][4] is required for generating TOTPs
 
 
 Installation
@@ -166,3 +166,5 @@ To rotate your private key:
 
 [1]: https://www.romanzolotarev.com/pass.html
 [2]: https://www.passwordstore.org
+[3]: https://man.openbsd.org/openssl
+[4]: https://www.nongnu.org/oath-toolkit/
