@@ -116,7 +116,11 @@ Hints
 
 To add a generated password:
 
-	$ pw generate | pw add <ENTRY>
+	$ pw generate | pw add example.com
+
+To generate a new password for an existing entry in-place:
+
+	$ pw show example.com | awk -v pw=$(pw generate) '$0 = NR == 1 ? pw : $0' | pw add example.com
 
 Set git to perform binary diffs:
 
