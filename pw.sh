@@ -19,6 +19,7 @@
 # This code is a rewrite of pass, copyright (c) 2018-2019 Roman Zolotarev.
 
 program=$(basename "$0")
+version=0.1.0
 public_key="${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}"
 private_key="${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}"
 pw_dir="${PW_DIR:-${HOME}/.pw}"
@@ -27,6 +28,7 @@ fail() { echo "$1"; exit 1; }
 
 usage() {
 	cat <<EOF
+$program  v$version
 usage:
   $program init
     initialize RSA key pair:
@@ -286,6 +288,7 @@ main() {
 		(init)			pkey_init ;;
 		(passphrase)	pkey_passphrase ;;
 		(config)		config ;;
+		(version)		echo "$program v$version" ;;
 		(*)				usage ;;
 	esac
 }

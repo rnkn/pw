@@ -4,4 +4,4 @@ BIN			= pw
 PREFIX		= /usr/local
 
 install:
-	install -m755 ${SRC} ${PREFIX}/bin/${BIN}
+	install -m 755 ${SRC} ${PREFIX}/bin/${BIN}
