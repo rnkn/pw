@@ -145,7 +145,7 @@ encrypt() {
 	[ -f "$public_key" ] || fail "Public key not found"
 	content=$(cat)
 	pw_workdir=$(mktemp -dt pw_work); trap "rm -rf $pw_workdir" EXIT
-	key=$(openssl rand -hex 16)
+	key=$(generate 32)
 	echo "$key" |
 		openssl pkeyutl -encrypt -inkey "$public_key" -pubin \
 				> "${pw_workdir}/${pw_key}" ||
