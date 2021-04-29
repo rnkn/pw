@@ -54,7 +54,7 @@ Usage
 	pw otp <ENTRY>
 	  return TOTP for ENTRY (requires oathtool)
 	pw generate [LENGTH]
-	  generate random password of LENGTH (default 20)
+	  generate random password of LENGTH (default 16)
 	pw sign <ENTRY>
 	  create signature for ENTRY with private key
 	pw verify <ENTRY>

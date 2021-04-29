@@ -49,7 +49,7 @@ usage:
   $program otp <ENTRY>
     return TOTP for ENTRY (requires oathtool)
   $program generate [LENGTH]
-    generate random password of LENGTH (default 20)
+    generate random password of LENGTH (default 16)
   $program sign <ENTRY>
     create signature for ENTRY with private key
   $program verify <ENTRY>
@@ -98,10 +98,10 @@ EOF
 }
 
 # generate(length)
-# returns: random password of length (default 20)
+# returns: random password of length (default 16)
 generate() {
-	len="${1:-20}"
-	jot -rc "$len" 33 123 | rs -g0 1
+	len="${1:-16}"
+	jot -rc "$len" 33 126 | rs -g0 1
 }
 
 # sign(data)
