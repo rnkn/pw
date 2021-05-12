@@ -96,7 +96,7 @@ PW_VERIFY:$PW_VERIFY
 PW_CLIP:$PW_CLIP
 EOF
 )
-	echo "$config" | column -ts:
+	echo "$config" | awk -F: '{ printf("%-16 s%s\n", $1, $2) }'
 }
 
 # generate(length)
