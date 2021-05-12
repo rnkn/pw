@@ -24,7 +24,7 @@ fail-safe, pw requires its default directories to be manually created.)
 
 After that:
 
-	$ git clone git://git.bydasein.com/pw
+	$ git clone git://git.bydasein.com/pw.git
 	$ cd pw
 	# make install
 
