@@ -43,9 +43,9 @@ usage:
   $program show <ENTRY>
     decrypt and show ENTRY
   $program cp|copy <ENTRY>
-    decrypt and send first line of ENTRY to ${PW_CLIP:-\$PW_CLIP}
+    decrypt and send first line of ENTRY to ${PW_CLIP:-PW_CLIP}
   $program edit <ENTRY>
-    temporarily decrypt ENTRY and edit in ${EDITOR:-\$EDITOR}
+    temporarily decrypt ENTRY and edit in ${EDITOR:-EDITOR}
   $program get-<FIELD> <ENTRY>
     decrypt ENTRY and return value of FIELD
   $program otp <ENTRY>
@@ -122,7 +122,7 @@ sign() {
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
 }
 
-# verify(data, pw_sig)
+# verify(pw_id)
 # returns: 0
 verify() {
 	pw_id="$1"
@@ -205,7 +205,7 @@ list() {
 # returns: 0
 copy() {
 	pw_id="$1"
-	[ -n "$PW_CLIP" ] || fail "\$PW_CLIP not set"
+	[ -n "$PW_CLIP" ] || fail "PW_CLIP not set"
 	return=$(decrypt "$pw_id")
 	if [ $? -ne 0 ]; then
 		fail "$return"
@@ -274,7 +274,7 @@ pkey_passphrase() {
 }
 
 main() {
-	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or \$PW_DIR not set"
+	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
 	case "$1" in
 		(ls|list|find)	shift; list "$@" ;;
 		(add)			shift; encrypt "$@" ;;
