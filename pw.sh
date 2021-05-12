@@ -100,10 +100,12 @@ EOF
 }
 
 # generate(length)
-# returns: random password of length (default 16)
+# returns: psuedo-random password of length (default 16)
 generate() {
 	len="${1:-16}"
-	jot -rc "$len" 33 126 | rs -g0 1
+	export LC_ALL=C
+	cat /dev/urandom | tr -dc '[:print:]' | head -c "$len"
+	echo
 }
 
 # sign(data)

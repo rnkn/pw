@@ -11,7 +11,8 @@ Requirements
 ------------
 
 - [`openssl`][3] handles all encryption processes
-- [`oathtool`][4] is required for generating TOTPs
+- [`urandom`][4] is required for generating random passwords
+- [`oathtool`][5] is required for generating TOTPs
 
 
 Installation
@@ -171,4 +172,5 @@ To rotate your private key:
 [1]: https://www.romanzolotarev.com/pass.html
 [2]: https://www.passwordstore.org
 [3]: https://man.openbsd.org/openssl
-[4]: https://www.nongnu.org/oath-toolkit/
+[4]: https://man.openbsd.org/urandom
+[5]: https://www.nongnu.org/oath-toolkit/
