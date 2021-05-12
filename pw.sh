@@ -224,7 +224,7 @@ get_field() {
 	if [ $? -ne 0 ]; then
 		fail "$return"
 	else
-		echo "$return" | grep "^${field}:" | sed -E 's/.+:[ 	]*(.+)/\1/'
+		echo "$return" | sed -nE "/^${field}:/ s/.+:[ 	]*(.+)/\1/p"
 		unset return
 	fi
 }
