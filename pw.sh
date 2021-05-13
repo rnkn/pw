@@ -83,20 +83,14 @@ pkey_init() {
 
 config() {
 	[ -n "$PW_PASSPHRASE" ] && pass="***" || pass="-"
-	[ -n "$PW_SIGN" ] || PW_SIGN="-"
-	[ -n "$PW_VERIFY" ] || PW_VERIFY="-"
-	[ -n "$PW_CLIP" ] || PW_CLIP="-"
-	config=$(cat <<EOF
-PW_PUBLIC_KEY:${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}
-PW_PRIVATE_KEY:${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}
-PW_DIR:${PW_DIR:-${HOME}/.pw}
-PW_PASSPHRASE:$pass
-PW_SIGN:$PW_SIGN
-PW_VERIFY:$PW_VERIFY
-PW_CLIP:$PW_CLIP
-EOF
-)
-	echo "$config" | awk -F: '{ printf("%-16 s%s\n", $1, $2) }'
+	format='%-16s%s\n'
+	printf "$format" PW_PUBLIC_KEY "${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}"
+	printf "$format" PW_PRIVATE_KEY "${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}"
+	printf "$format" PW_DIR "${PW_DIR:-${HOME}/.pw}"
+	printf "$format" PW_PASSPHRASE "$pass"
+	printf "$format" PW_SIGN "${PW_SIGN:--}"
+	printf "$format" PW_VERIFY "${PW_VERIFY:--}"
+	printf "$format" PW_CLIP "${PW_CLIP:--}"
 }
 
 # generate(length)
