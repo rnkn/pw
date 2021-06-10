@@ -1,6 +1,6 @@
 .POSIX:
-SRC			= pw.sh
-BIN			= pw
+SRC		= pw.sh
+BIN		= pw
 PREFIX		= /usr/local
 
 install:
