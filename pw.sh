@@ -69,12 +69,6 @@ generate() {
 # create signature from data
 # returns: 0
 sign() {
-	opts="v"
-	getopts "$opts" opt
-	case "$opt" in
-		(v)		verbose=1 ;;
-	esac
-	shift $(( OPTIND - 1 ))
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -83,18 +77,12 @@ sign() {
 	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
 	openssl dgst -sha256 -binary < "$pw_tar" |
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
-	[ $? -eq 0 ] && [ "$verbose" -eq 1 ] && echo "Created signature: $pw_sig"
+	[ $? -eq 0 ] && echo "Created signature: $pw_sig"
 }
 
 # verify(pw_id)
 # returns: 0
 verify() {
-	# opts="v"
-	# getopts "$opts" opt
-	# case "$opt" in
-	# 	(v)		verbose=1 ;;
-	# esac
-	# shift $(( OPTIND - 1 ))
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -104,13 +92,13 @@ verify() {
 	openssl dgst -sha256 -binary < "$pw_tar" |
 		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$pw_sig" >/dev/null 2>&1 ||
 		fail "Verification failure: $pw_id"
-	[ $? -eq 0 ] && [ "$verbose" == 1 ] && echo "Verified signature: $pw_sig"
+	[ $? -eq 0 ] && echo "Verified signature: $pw_sig"
 }
 
 add_usage() {
 	cat <<EOF
 usage:
-	 $program add [-fsSv] <ENTRY>
+	 $program add [-fsv] <ENTRY>
 	 $program add -h
 EOF
 }
@@ -120,16 +108,15 @@ EOF
 # create signature of tar archive
 # returns: 0
 add() {
-	verbose=0; sign=0; verify=0; force=0
-	opts="fhsSv"
+	sign=0; verify=0; force=0
+	opts="fhsv"
 	while getopts "$opts" opt
 	do
 		case "$opt" in
 			(h)		add_usage; exit ;;
-			(v)		verbose=1 ;;
-			(s)		verify=1 ;;
-			(S)		sign=1 ;;
 			(f)		force=1 ;;
+			(s)		sign=1 ;;
+			(v)		verify=1 ;;
 		esac
 	done
 	shift $(( OPTIND - 1 ))
@@ -161,7 +148,7 @@ add() {
 	if [ -n "$PW_VERIFY" ] || [ "$verify" -eq 1 ]; then
 		verify "$pw_id"
 	fi
-	[ "$verbose" -eq 1 ] && echo "Encryption succeeded: $pw_id"
+    echo "Encryption succeeded: $pw_id"
 }
 
 # copy(stdin)
@@ -190,17 +177,16 @@ EOF
 # show(pw_id)
 # returns: decrypted file contents
 show() {
-	verbose=0; copy=0; verify=0; totp=0
-	opts="chk:stv"
+	copy=0; verify=0; totp=0
+	opts="chk:tv"
 	while getopts "$opts" opt
 	do
 		case "$opt" in
 			(h)		show_usage; exit ;;
-			(v)		verbose=1 ;;
 			(c)		copy=1 ;;
-			(s)		verify=1 ;;
 			(k)		field="$OPTARG" ;;
 			(t)		field=totp ;;
+			(v)		verify=1 ;;
 		esac
 	done
 	shift $(( OPTIND - 1 ))
@@ -288,13 +274,13 @@ EOF
 }
 
 main() {
-	options=':hVp'
+	opts=':hpv'
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
-	while getopts "$options" opt; do
+	while getopts "$opts" opt; do
 		case "$opt" in
 			(h)			main_usage; exit ;;
-			(V)			echo "$program v$version"; exit ;;
 			(p)			print_env; exit ;;
+			(v)			echo "$program v$version"; exit ;;
 		esac
 	done
 	OPTIND=0
