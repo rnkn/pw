@@ -269,7 +269,9 @@ pkey_passphrase() {
 main_usage() {
 	cat <<EOF
 usage:
-	$program [-h] [-V] [-p]
+	$program [-h] [-v] [-p]
+	$program <COMMAND>
+	commands: init list add show edit sign verify generate passphrase
 EOF
 }
 
@@ -286,13 +288,13 @@ main() {
 	OPTIND=0
 
 	case "$1" in
-		(ls|list|find)	shift; list "$@" ;;
+		(ls|list)		shift; list "$@" ;;
 		(add)			shift; add "$@" ;;
 		(show)			shift; show "$@" ;;
-		(edit)			shift; edit "$@" ;;
+		(ed|edit)		shift; edit "$@" ;;
 		(sign)			shift; sign "$@" ;;
 		(verify)		shift; verify "$@" ;;
-		(generate)		shift; generate "$@" ;;
+		(gen|generate)	shift; generate "$@" ;;
 		(git)			"$@" ;;
 		(init)			pkey_init ;;
 		(passphrase)	pkey_passphrase ;;
