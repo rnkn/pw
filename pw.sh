@@ -54,21 +54,48 @@ print_env() {
 	printf "$format" PW_SIGN "${PW_SIGN:--}"
 	printf "$format" PW_VERIFY "${PW_VERIFY:--}"
 	printf "$format" PW_CLIP "${PW_CLIP:--}"
+	exit
+}
+
+generate_usage() {
+	cat <<EOF
+generate random password of LENGTH (default 16)
+usage:
+	$program generate [LENGTH]
+	$program generate -h
+EOF
+	exit
 }
 
 # generate(length)
 # returns: psuedo-random password of length (default 16)
 generate() {
+	opts='h'
+	getopts "$opts" opt
+	[ "$opt" == h ] && generate_usage # exit
 	len="${1:-16}"
 	export LC_ALL=C
 	cat /dev/urandom | tr -d ' ' | tr -dc '[:print:]' | head -c "$len"
 	echo
 }
 
+sign_usage() {
+	cat <<EOF
+create signature for ENTRY with private key
+usage:
+	$program sign <ENTRY>
+	$program sign -h
+EOF
+	exit
+}
+
 # sign(data)
 # create signature from data
 # returns: 0
 sign() {
+	opts='h'
+	getopts "$opts" opt
+	[ "$opt" == h ] && sign_usage # exit
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -79,10 +106,22 @@ sign() {
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
 	[ $? -eq 0 ] && echo "Created signature: $pw_sig"
 }
+verify_usage() {
+	cat <<EOF
+verify ENTRY against signature with public key
+usage:
+	$program verify <ENTRY>
+	$program verify -h
+EOF
+	exit
+}
 
 # verify(pw_id)
 # returns: 0
 verify() {
+	opts='h'
+	getopts "$opts" opt
+	[ "$opt" == h ] && verify_usage # exit
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -97,10 +136,12 @@ verify() {
 
 add_usage() {
 	cat <<EOF
+add ENTRY from STDIN or prompt for multiline text
 usage:
 	 $program add [-fsv] <ENTRY>
 	 $program add -h
 EOF
+	exit
 }
 
 # add(pw_id)
@@ -113,7 +154,7 @@ add() {
 	while getopts "$opts" opt
 	do
 		case "$opt" in
-			(h)		add_usage; exit ;;
+			(h)		add_usage ;; # exit
 			(f)		force=1 ;;
 			(s)		sign=1 ;;
 			(v)		verify=1 ;;
@@ -167,11 +208,13 @@ get_field() {
 
 show_usage() {
 	cat <<EOF
+decrypt and show ENTRY or ENTRY FIELD or ENTRY TOTP
 usage:
 	$program show [-cstv] <ENTRY>
 	$program show [-csv] -k <FIELD> <ENTRY>
 	$program show -h
 EOF
+	exit
 }
 
 # show(pw_id)
@@ -182,7 +225,7 @@ show() {
 	while getopts "$opts" opt
 	do
 		case "$opt" in
-			(h)		show_usage; exit ;;
+			(h)		show_usage ;; # exit
 			(c)		copy=1 ;;
 			(k)		field="$OPTARG" ;;
 			(t)		field=totp ;;
@@ -228,16 +271,42 @@ show() {
 	rm -rf "$pw_workdir"
 }
 
+list_usage() {
+	cat <<EOF
+list entries matching QUERY or list all
+usage:
+	$program list [QUERY]
+	$program list -h
+EOF
+	exit
+}
+
 # list(string)
 # returns: list of matching password IDs
 list() {
+	opts='h'
+	getopts "$opts" opt
+	[ "$opt" == h ] && list_usage # exit
 	[ -d "$pw_dir" ] || fail "$pw_dir not found"
 	find "$pw_dir" -type f -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
+}
+
+edit_usage() {
+	cat <<EOF
+temporarily decrypt ENTRY and edit in EDITOR
+usage:
+	$program edit <ENTRY>
+	$program edit -h
+EOF
+	exit
 }
 
 # edit(pw_id)
 # returns: 0
 edit() {
+	opts='h'
+	getopts "$opts" opt
+	[ "$opt" == h ] && edit_usage # exit
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
@@ -273,6 +342,7 @@ usage:
 	$program <COMMAND>
 	commands: init list add show edit sign verify generate passphrase
 EOF
+	exit
 }
 
 main() {
@@ -280,8 +350,8 @@ main() {
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
 	while getopts "$opts" opt; do
 		case "$opt" in
-			(h)			main_usage; exit ;;
-			(p)			print_env; exit ;;
+			(h)			main_usage ;;
+			(p)			print_env ;;
 			(v)			echo "$program v$version"; exit ;;
 		esac
 	done
