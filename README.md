@@ -36,51 +36,50 @@ or
 Usage
 -----
 
-	pw init
+	pw [COMMAND] [ENTRY]
+	pw -h
+
+Commands:
+
+	init
 	  initialize RSA key pair
-	pw config
-	  print PW_* variables (passphrase hidden)
-	pw ls|list|find [QUERY]
+	ls|list [QUERY]
 	  list entries matching QUERY; without QUERY, list all
-	pw add <ENTRY>
+	add <ENTRY>
 	  add ENTRY, prompting for multiline text
-	pw show <ENTRY>
+	show <ENTRY>
 	  decrypt and show ENTRY
-	pw cp|copy <ENTRY>
-	  decrypt and send first line of ENTRY to $PW_CLIP
-	pw edit <ENTRY>
+	ed|edit <ENTRY>
 	  temporarily decrypt ENTRY and edit in $EDITOR
-	pw get-<FIELD> <ENTRY>
-	  decrypt ENTRY and return value of FIELD
-	pw otp <ENTRY>
-	  return TOTP for ENTRY (requires oathtool)
-	pw generate [LENGTH]
+	gen|generate [LENGTH]
 	  generate random password of LENGTH (default 16)
-	pw sign <ENTRY>
+	sign <ENTRY>
 	  create signature for ENTRY with private key
-	pw verify <ENTRY>
+	verify <ENTRY>
 	  verify ENTRY against signature with public key
-	pw git <ARGUMENTS>
+	git <ARGUMENTS>
 	  call git and pass ARGUMENTS verbatim
-	pw passphrase
-	  change private key passphrase
+	master
+	  change private key password
+
+Use the `-h` option after each command for usage.
 
 Some configuration via environment variables:
 
 	PW_PUBLIC_KEY	location of public key
 	PW_PRIVATE_KEY	location of private key
 	PW_DIR			location of password directory
-	PW_PASSPHRASE	private key passphrase (see below)
+	PW_MASTER		private key passphrase (see below)
 	PW_SIGN			when set, sign password tarballs
 	PW_VERIFY		when set, verify password tarballs
 	PW_CLIP			clipboard program name
 
 To avoid needing to enter your private key passphrase with every invocation of
-pw, set the `PW_PASSPHRASE` environment variable to your private key passphrase.
+pw, set the `PW_MASTER` environment variable to your private key passphrase.
 For convenience, add the following aliases to your profile:
 
-	alias pw_unlock="stty -echo; read -r PW_PASSPHRASE; stty echo; export PW_PASSPHRASE"
-	alias pw_lock="unset PW_PASSPHRASE"
+	alias pw_unlock="stty -echo; read -r PW_MASTER; stty echo; export PW_MASTER"
+	alias pw_lock="unset PW_MASTER"
 
 
 How it works
@@ -121,7 +120,7 @@ To add a generated password:
 
 To generate a new password for an existing entry in-place:
 
-	$ pw show example.com | awk -v pw=$(pw generate) '$0 = NR == 1 ? pw : $0' | pw add example.com
+	$ pw show example.com | awk -v pw=$(pw generate) '$0 = NR == 1 ? pw : $0' | pw add -f example.com
 
 Set git to perform binary diffs:
 
@@ -145,7 +144,7 @@ To batch edit all entries, e.g. to change an email:
 	$ pw_unlock
 	$ pw ls | while read -r entry
 	> do
-	>	pw show "$entry" | sed 's/@example\.com/@newaddress.com/' | pw add "$entry"
+	>	pw show "$entry" | sed 's/@example\.com/@newaddress.com/' | pw add -f "$entry"
 	> done
 
 To rotate your private key:
