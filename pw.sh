@@ -32,12 +32,12 @@ fail() { echo "$1"; exit 1; }
 # returns: 0
 pkey_init() {
 	[ -f "$private_key" ] && fail "$private_key already exists"
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-pass env:PW_PASSPHRASE"
+	[ -n "$PW_MASTER" ] && pkey_pass_args="-pass env:PW_MASTER"
 	echo "Generating private RSA key: $private_key"
 	openssl genpkey -algorithm RSA -aes-256-cbc $pkey_pass_args > "$private_key" ||
 		fail "Private key generation failed: $private_key"
 	chmod 0400 "$private_key"
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
+	[ -n "$PW_MASTER" ] && pkey_pass_args="-passin env:PW_MASTER"
 	echo "Generating public RSA key: $public_key"
 	openssl pkey -in "$private_key" $pkey_pass_args -pubout > "$public_key" ||
 		fail "Public key generation failed: $public_key"
@@ -45,12 +45,12 @@ pkey_init() {
 }
 
 print_env() {
-	[ -n "$PW_PASSPHRASE" ] && pass="***" || pass="-"
+	[ -n "$PW_MASTER" ] && unlock="***" || unlock="-"
 	format='%-16s%s\n'
 	printf "$format" PW_PUBLIC_KEY "${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}"
 	printf "$format" PW_PRIVATE_KEY "${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}"
 	printf "$format" PW_DIR "${PW_DIR:-${HOME}/.pw}"
-	printf "$format" PW_PASSPHRASE "$pass"
+	printf "$format" PW_MASTER "$unlock"
 	printf "$format" PW_SIGN "${PW_SIGN:--}"
 	printf "$format" PW_VERIFY "${PW_VERIFY:--}"
 	printf "$format" PW_CLIP "${PW_CLIP:--}"
@@ -101,7 +101,7 @@ sign() {
 	pw_sig="${pw_tar}.sig"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "$pw_tar" ] || fail "$pw_id not found"
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
+	[ -n "$PW_MASTER" ] && pkey_pass_args="-passin env:PW_MASTER"
 	openssl dgst -sha256 -binary < "$pw_tar" |
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
 	[ $? -eq 0 ] && echo "Created signature: $pw_sig"
@@ -238,7 +238,7 @@ show() {
 	[ -f "$private_key" ] || fail "Private key not found"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "$pw_tar" ] || fail "$pw_id not found"
-	[ -n "$PW_PASSPHRASE" ] && pkey_pass_args="-passin env:PW_PASSPHRASE"
+	[ -n "$PW_MASTER" ] && pkey_pass_args="-passin env:PW_MASTER"
 	if [ -n "$PW_VERIFY" ] || [ "$verify" -eq 1 ]; then
 		pw_sig="${pw_tar}.sig"
 		verify "$pw_id"
@@ -323,9 +323,9 @@ edit() {
 	rm "$workfile"
 }
 
-# pkey_passphrase()
+# pkey_master()
 # returns: 0
-pkey_passphrase() {
+pkey_master() {
 	[ -f "$private_key" ] || fail "Private key not found"
 	workkey=$(mktemp -t pw_work); trap "rm -f $workkey" EXIT
 	chmod 0600 "$private_key"
@@ -340,7 +340,7 @@ main_usage() {
 usage:
 	$program [-h] [-v] [-p]
 	$program <COMMAND>
-	commands: init list add show edit sign verify generate passphrase
+	commands: init list add show edit sign verify generate master
 EOF
 	exit
 }
@@ -367,7 +367,7 @@ main() {
 		(gen|generate)	shift; generate "$@" ;;
 		(git)			"$@" ;;
 		(init)			pkey_init ;;
-		(passphrase)	pkey_passphrase ;;
+		(master)		pkey_master ;;
 		(*)				show "$@" ;;
 	esac
 }
