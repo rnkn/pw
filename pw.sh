@@ -338,7 +338,7 @@ pkey_master() {
 main_usage() {
 	cat <<EOF
 usage:
-	$program [-h] [-v] [-p]
+	$program [-E] [-h] [-v]
 	$program <COMMAND>
 	commands: init list add show edit sign verify generate master
 EOF
@@ -346,12 +346,12 @@ EOF
 }
 
 main() {
-	opts=':hpv'
+	opts=':Ehv'
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
 	while getopts "$opts" opt; do
 		case "$opt" in
+			(E)			print_env ;;
 			(h)			main_usage ;;
-			(p)			print_env ;;
 			(v)			echo "$program v$version"; exit ;;
 		esac
 	done
