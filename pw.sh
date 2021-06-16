@@ -331,7 +331,7 @@ pkey_master() {
 	chmod 0600 "$private_key"
 	openssl pkey -in "$private_key" -out "$workkey" -aes256 &&
 		mv "$workkey" "$private_key" ||
-			fail "Error changing passphrase: $private_key"
+			fail "Error changing password: $private_key"
 	chmod 0400 "$private_key"
 }
 

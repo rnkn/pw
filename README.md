@@ -69,13 +69,13 @@ Some configuration via environment variables:
 	PW_PUBLIC_KEY	location of public key
 	PW_PRIVATE_KEY	location of private key
 	PW_DIR			location of password directory
-	PW_MASTER		private key passphrase (see below)
+	PW_MASTER		private key password (see below)
 	PW_SIGN			when set, sign password tarballs
 	PW_VERIFY		when set, verify password tarballs
 	PW_CLIP			clipboard program name
 
-To avoid needing to enter your private key passphrase with every invocation of
-pw, set the `PW_MASTER` environment variable to your private key passphrase.
+To avoid needing to enter your private key password with every invocation of
+pw, set the `PW_MASTER` environment variable to your private key password.
 For convenience, add the following aliases to your profile:
 
 	alias pw_unlock="stty -echo; read -r PW_MASTER; stty echo; export PW_MASTER"
