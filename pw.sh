@@ -168,8 +168,7 @@ EOF
 add() {
 	sign=0; verify=0; force=0
 	opts="fhsv"
-	while getopts "$opts" opt
-	do
+	while getopts "$opts" opt; do
 		case "$opt" in
 			(h)		add_usage ;; # exit
 			(f)		force=1 ;;
@@ -242,8 +241,7 @@ EOF
 show() {
 	copy=0; verify=0; totp=0
 	opts="chk:tv"
-	while getopts "$opts" opt
-	do
+	while getopts "$opts" opt; do
 		case "$opt" in
 			(h)		show_usage ;; # exit
 			(c)		copy=1 ;;
