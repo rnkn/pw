@@ -19,9 +19,9 @@
 # This code is a rewrite of pass, copyright (c) 2018-2019 Roman Zolotarev.
 
 program=$(basename "$0")
-version=0.3.0
-public_key="${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}"
-private_key="${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}"
+version=0.4.0
+public_key="${PW_PUBLIC_KEY:-${HOME}/.keys/pw.pub}"
+private_key="${PW_PRIVATE_KEY:-${HOME}/.keys/pw.sec}"
 pw_dir="${PW_DIR:-${HOME}/.pw}"
 
 fail() { echo "$1"; exit 1; }
@@ -50,9 +50,9 @@ pkey_init() {
 print_env() {
 	[ -n "$PW_MASTER" ] && unlock="***" || unlock="-"
 	format='%-16s%s\n'
-	printf "$format" PW_PUBLIC_KEY "${PW_PUBLIC_KEY:-${HOME}/.keys/key.pub}"
-	printf "$format" PW_PRIVATE_KEY "${PW_PRIVATE_KEY:-${HOME}/.keys/key.sec}"
-	printf "$format" PW_DIR "${PW_DIR:-${HOME}/.pw}"
+	printf "$format" PW_PUBLIC_KEY "$public_key"
+	printf "$format" PW_PRIVATE_KEY "$private_key"
+	printf "$format" PW_DIR "$pw_dir"
 	printf "$format" PW_MASTER "$unlock"
 	printf "$format" PW_SIGN "${PW_SIGN:--}"
 	printf "$format" PW_VERIFY "${PW_VERIFY:--}"
