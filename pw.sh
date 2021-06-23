@@ -44,6 +44,9 @@ pkey_init() {
 	chmod 0600 "$public_key"
 }
 
+# print_env()
+# print relevant environment variables
+# returns: 0
 print_env() {
 	[ -n "$PW_MASTER" ] && unlock="***" || unlock="-"
 	format='%-16s%s\n'
@@ -57,6 +60,9 @@ print_env() {
 	exit
 }
 
+# generate_usage()
+# print generate subcommand usage
+# returns: 0
 generate_usage() {
 	cat <<EOF
 generate random password of LENGTH (default 16)
@@ -79,6 +85,9 @@ generate() {
 	echo
 }
 
+# sign_usage()
+# print sign subcommand usage
+# returns: 0
 sign_usage() {
 	cat <<EOF
 create signature for ENTRY with private key
@@ -106,6 +115,10 @@ sign() {
 		openssl pkeyutl -sign -inkey "$private_key" $pkey_pass_args > "$pw_sig"
 	[ $? -eq 0 ] && echo "Created signature: $pw_sig"
 }
+
+# verify_usage()
+# print verify subcommand usage
+# returns: 0
 verify_usage() {
 	cat <<EOF
 verify ENTRY against signature with public key
@@ -117,6 +130,7 @@ EOF
 }
 
 # verify(pw_id)
+# verify PW_ID against signature with public key
 # returns: 0
 verify() {
 	opts='h'
@@ -134,6 +148,9 @@ verify() {
 	[ $? -eq 0 ] && echo "Verified signature: $pw_sig"
 }
 
+# add_usage()
+# print add subcommand usage
+# returns: 0
 add_usage() {
 	cat <<EOF
 add ENTRY from STDIN or prompt for multiline text
@@ -206,6 +223,9 @@ get_field() {
 	sed -nE "/^${field}:/ s/.+:[ 	]*(.+)/\1/p"
 }
 
+# show_usage()
+# print show subcommand usage
+# returns: 0
 show_usage() {
 	cat <<EOF
 decrypt and show ENTRY or ENTRY FIELD or ENTRY TOTP
@@ -271,6 +291,9 @@ show() {
 	rm -rf "$pw_workdir"
 }
 
+# list_usage()
+# print list subcommand usage
+# returns: 0
 list_usage() {
 	cat <<EOF
 list entries matching QUERY or list all
@@ -291,6 +314,9 @@ list() {
 	find "$pw_dir" -type f -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
 
+# edit_usage()
+# print edit subcommand usage
+# returns: 0
 edit_usage() {
 	cat <<EOF
 temporarily decrypt ENTRY and edit in EDITOR
@@ -324,6 +350,7 @@ edit() {
 }
 
 # pkey_master()
+# change private key passphrase
 # returns: 0
 pkey_master() {
 	[ -f "$private_key" ] || fail "Private key not found"
@@ -335,6 +362,9 @@ pkey_master() {
 	chmod 0400 "$private_key"
 }
 
+# main_usage()
+# print program usage
+# returns: 0
 main_usage() {
 	cat <<EOF
 usage:
@@ -345,6 +375,11 @@ EOF
 	exit
 }
 
+# main()
+# with option, call appropriate function and exit
+# with subcommand, call subcommand function
+# without subcommand, call show()
+# returns: 0
 main() {
 	opts=':Ehv'
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
