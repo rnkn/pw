@@ -162,8 +162,8 @@ To rotate your private key:
 	>		PW_DIR=$HOME/.pw_new \
 	>		pw add "$entry"
 	> done
-	$ mv $HOME/.keys/{newkey,key}.sec
-	$ mv $HOME/.keys/{newkey,key}.pub
+	$ mv $HOME/.keys/{newkey,pw}.sec
+	$ mv $HOME/.keys/{newkey,pw}.pub
 	$ rm -rf $HOME/.pw
 	$ mv $HOME/.pw_new $HOME/.pw
 
