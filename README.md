@@ -30,7 +30,7 @@ After that:
 
 or
 
-	$ make PREFIX=$HOME/bin install
+	$ make PREFIX=$HOME install
 
 
 Usage
