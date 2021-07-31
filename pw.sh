@@ -213,7 +213,7 @@ add() {
 # returns: 0
 copy() {
 	[ -n "$PW_CLIP" ] || fail "PW_CLIP not set"
-	sed 1q | tr -d \\n | "$PW_CLIP"
+	sed 1q | tr -d \\n | $PW_CLIP
 }
 
 # get_field(stdin)
