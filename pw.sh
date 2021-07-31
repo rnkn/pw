@@ -78,7 +78,7 @@ EOF
 generate() {
 	opts='h'
 	getopts "$opts" opt
-	[ "$opt" == h ] && generate_usage # exit
+	[ "$opt" = h ] && generate_usage # exit
 	len="${1:-16}"
 	export LC_ALL=C
 	cat /dev/urandom | tr -d ' ' | tr -dc '[:print:]' | head -c "$len"
@@ -104,7 +104,7 @@ EOF
 sign() {
 	opts='h'
 	getopts "$opts" opt
-	[ "$opt" == h ] && sign_usage # exit
+	[ "$opt" = h ] && sign_usage # exit
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -135,7 +135,7 @@ EOF
 verify() {
 	opts='h'
 	getopts "$opts" opt
-	[ "$opt" == h ] && verify_usage # exit
+	[ "$opt" = h ] && verify_usage # exit
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -272,7 +272,7 @@ show() {
 					 < "${pw_workdir}/${pw_enc}" ||
 				 fail "Decryption failed: $pw_enc")
 	[ $? -eq 0 ] || fail "$return"
-	if [ "$field" == totp ]; then
+	if [ "$field" = totp ]; then
 		[ "$(command -v oathtool)" ] || fail "Command oathtool not found"
 		secret=$(echo "$return" | get_field)
 		[ -n "$secret" ] || fail "Missing TOTP secret: $pw_id"
@@ -307,7 +307,7 @@ EOF
 list() {
 	opts='h'
 	getopts "$opts" opt
-	[ "$opt" == h ] && list_usage # exit
+	[ "$opt" = h ] && list_usage # exit
 	[ -d "$pw_dir" ] || fail "$pw_dir not found"
 	find "$pw_dir" -type f -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
 }
@@ -330,7 +330,7 @@ EOF
 edit() {
 	opts='h'
 	getopts "$opts" opt
-	[ "$opt" == h ] && edit_usage # exit
+	[ "$opt" = h ] && edit_usage # exit
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
