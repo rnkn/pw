@@ -1,0 +1,180 @@
+.Dd $Mdocdate$
+.Dt PW 1
+.Os
+.Sh NAME
+.Nm pw
+.Nd POSIX shell password manager
+.Sh SYNOPSIS
+.Nm
+.Op command
+.Op entry
+.Nm
+.Op command
+.Fl h
+.Sh DESCRIPTION
+The
+.Nm
+utility processes files ...
+.Bl -tag
+.It Cm init
+Initialize RSA key pair
+.It Cm ls | Cm list Op query
+List entries matching
+.Op query
+or list all
+.It Cm add Op Fl fsv Xo
+.Ar entry
+.Xc
+Add
+.Ar entry
+from STDIN or prompt for multiline text
+.Bl -tag -compact -width 10n
+.It Fl f
+force, overwrite existing
+.It Fl s
+create signature with private key
+.It Fl v
+verify against public key
+.El
+.It Cm show Op Fl cv Xo
+.Op Fl t
+.Op Fl k Ar field
+.Ar entry Xc
+Decrypt and show
+.Ar entry
+.Bl -tag -compact -width 10n
+.It Fl c
+pipe to
+.Ev PW_CLIP
+.It Fl v
+verify against signature with public key
+.It Fl t
+show TOTP
+.Pq requires oathtool
+.It Fl k Ar field
+show value of
+.Ar field
+.El
+.It Cm ed | Cm edit Ar entry
+Temporarily decrypt
+.Ar entry
+and edit in
+.Ev EDITOR
+.It Cm gen | Cm generate Op length
+Generate random password of
+.Op length
+.Pq default 16
+.It Cm sign Ar entry
+Create signature for
+.Ar entry
+with private key
+.It Cm verify Ar entry
+Verify
+.Ar entry
+against signature with public key
+.It Cm git Ar arguments
+Call git and pass
+.Ar arguments
+verbatim
+.It Cm master
+Change private key passphrase
+.\" .Sh RETURN VALUES
+.\" For sections 2, 3, and 9 function return values only.
+.Sh ENVIRONMENT
+All
+.Nm
+configuration is accomplished via environment variables:
+.Bl -tag
+.It Ev PW_PUBLIC_KEY
+location of public key
+.It Ev PW_PRIVATE_KEY
+location of private key
+.It Ev PW_DIR
+location of password directory
+.It Ev PW_MASTER
+private key password (see below)
+.It Ev PW_SIGN
+when set, sign password tarballs
+.It Ev PW_VERIFY
+when set, verify password tarballs
+.It Ev PW_CLIP
+clipboard program name
+.El
+.\" .Sh FILES
+.\" .Sh EXIT STATUS
+.\" For sections 1, 6, and 8 only.
+.Sh EXAMPLES
+To add a generated password:
+.Pp
+.Dl $ pw generate | pw add example.com
+.Pp
+To generate a new password for an existing entry in-place:
+.Pp
+.Bd -literal -offset indent
+$ pw show example.com | sed "1d; i\\\\
+> $(pw generate)
+> " | pw add -f example.com
+.Ed
+.Pp
+Set git to perform binary diffs:
+.Pp
+.Bd -literal -offset indent
+$ cd .pw
+$ cat > .gitattributes
+> *.tar diff=
+> *.tar.sig diff=
+.Ed
+.Pp
+To import from `password-store`:
+.Pp
+.Bd -literal -offset indent
+$ pw_unlock
+$ cd $HOME/.password-store
+$ for file in *.gpg; do
+>	entry="${file%.gpg}"
+>	pass "$entry" | sed -E 's/^otpauth:.*secret=([A-Za-z2-7]+).*/totp: \\1/' |
+>		pw add "$entry"
+> done
+.Ed
+.Pp
+To batch edit all entries, e.g. to change an email:
+.Pp
+.Bd -literal -offset indent
+$ pw_unlock
+$ pw ls | while read -r entry; do
+>	pw show "$entry" | sed 's/@example\\.com/@newaddress.com/' |
+>		pw add -f "$entry"
+> done
+.Ed
+.Pp
+To rotate your private key:
+.Pp
+.Bd -literal -offset indent
+$ tar -cvf keybackup.tar $HOME/.keys
+$ PW_PRIVATE_KEY=$HOME/.keys/newkey.sec \\
+> PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \\
+> pw init
+$ mkdir $HOME/.pw_new
+$ pw_unlock
+$ pw ls | while read -r entry; do
+>	pw show "$entry" |
+>		PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \\
+>		PW_DIR=$HOME/.pw_new \\
+>		pw add "$entry"
+> done
+$ mv $HOME/.keys/{newkey,pw}.sec
+$ mv $HOME/.keys/{newkey,pw}.pub
+$ rm -rf $HOME/.pw
+$ mv $HOME/.pw_new $HOME/.pw
+.Ed
+.Pp
+.\" .Sh SEE ALSO
+.\" .Xr foobar 1
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.Sh AUTHOR
+.An Paul W. Rankin
+.Mt <pwr@bydasein.com>
+.\" .Sh CAVEATS
+.\" .Sh BUGS
+.\" .Sh SECURITY CONSIDERATIONS
