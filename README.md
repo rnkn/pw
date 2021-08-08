@@ -44,13 +44,13 @@ Commands:
 	init
 	  initialize RSA key pair
 	ls|list [QUERY]
-	  list entries matching QUERY; without QUERY, list all
+	  list entries matching QUERY or list all
 	add <ENTRY>
-	  add ENTRY, prompting for multiline text
+	  add ENTRY from STDIN or prompt for multiline text
 	show <ENTRY>
-	  decrypt and show ENTRY
+	  decrypt and show ENTRY or ENTRY FIELD or ENTRY TOTP
 	ed|edit <ENTRY>
-	  temporarily decrypt ENTRY and edit in $EDITOR
+	  temporarily decrypt ENTRY and edit in EDITOR
 	gen|generate [LENGTH]
 	  generate random password of LENGTH (default 16)
 	sign <ENTRY>
