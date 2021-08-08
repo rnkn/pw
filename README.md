@@ -37,7 +37,7 @@ Usage
 -----
 
 	pw [COMMAND] [ENTRY]
-	pw -h
+	pw [COMMAND] -h
 
 Commands:
 
@@ -62,9 +62,7 @@ Commands:
 	master
 	  change private key password
 
-Use the `-h` option after each command for usage.
-
-Some configuration via environment variables:
+All configuration is accomplished via environment variables:
 
 	PW_PUBLIC_KEY	location of public key
 	PW_PRIVATE_KEY	location of private key
@@ -120,7 +118,9 @@ To add a generated password:
 
 To generate a new password for an existing entry in-place:
 
-	$ pw show example.com | awk -v pw=$(pw generate) '$0 = NR == 1 ? pw : $0' | pw add -f example.com
+	$ pw show example.com | sed "1d; i\\
+	> $(pw generate)
+	> " | pw add -f example.com
 
 Set git to perform binary diffs:
 
@@ -133,8 +133,7 @@ To import from `password-store`:
 
 	$ pw_unlock
 	$ cd $HOME/.password-store
-	$ for file in *.gpg
-	> do
+	$ for file in *.gpg; do
 	>	entry="${file%.gpg}"
 	>	pass "$entry" | sed -E 's/^otpauth:.*secret=([A-Za-z2-7]+).*/totp: \1/' | pw add "$entry"
 	> done
@@ -142,8 +141,7 @@ To import from `password-store`:
 To batch edit all entries, e.g. to change an email:
 
 	$ pw_unlock
-	$ pw ls | while read -r entry
-	> do
+	$ pw ls | while read -r entry; do
 	>	pw show "$entry" | sed 's/@example\.com/@newaddress.com/' | pw add -f "$entry"
 	> done
 
@@ -155,8 +153,7 @@ To rotate your private key:
 	> pw init
 	$ mkdir $HOME/.pw_new
 	$ pw_unlock
-	$ pw ls | while read -r entry
-	> do
+	$ pw ls | while read -r entry; do
 	>	pw show "$entry" |
 	>		PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \
 	>		PW_DIR=$HOME/.pw_new \
