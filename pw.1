@@ -12,10 +12,11 @@
 .Nm
 .Op Cm command
 .Fl h
-.Sh DESCRIPTION
-The
 .Nm
-utility processes files ...
+.Fl E
+.Nm
+.Fl v
+.Sh DESCRIPTION
 .Bl -tag
 .It Cm init
 Initialize RSA key pair.
@@ -64,7 +65,7 @@ with public key
 show
 .Ar entry
 TOTP
-.Pq requires oathtool
+.Pq requires Xr oathtool 1
 .It Fl k Ar field
 show value of
 .Ar field
@@ -93,7 +94,39 @@ Call git and pass
 .Ar arguments
 verbatim.
 .It Cm master
-Change private key passphrase.
+Change private key passphrase
+.Pq or Dq master password .
+.It Oo Cm command Oc Fl h
+Print usage, or print usage for
+.Cm command .
+.It Fl E
+Print configuration environment variables
+.Pq see Sx ENVIRONMENT .
+.It Fl v
+Print program version.
+.El
+.Ss Avoiding retyping your master password
+Before prompting for the private key passphrase,
+.Nm
+checks if environment variable
+.Ev PW_MASTER
+is set, and if so, uses the value of this.
+This can help you avoid retyping your
+.Dq master password
+every time.
+.Pp
+For convenience, you can set the following aliases in your
+.Pa .profile :
+.Bd -literal -offset Ds
+alias pw_unlock="stty -echo; read -r PW_MASTER; stty echo; export PW_MASTER"
+alias pw_lock="unset PW_MASTER"
+.Ed
+.Pp
+These are also provided in
+.Pa pw_alias.sh ,
+allowing you to instead just source by adding the following:
+.Pp
+.Dl . ./pw_alias.sh
 .Sh ENVIRONMENT
 All
 .Nm
@@ -117,7 +150,7 @@ Clipboard command. Must be set for
 .Fl c
 to work.
 .It Ev PW_MASTER
-Private key password.
+Private key passphrase.
 .El
 .\" .Sh FILES
 .Sh EXIT STATUS
@@ -130,7 +163,7 @@ To add a generated password:
 .Pp
 To generate a new password for an existing entry in-place:
 .Pp
-.Bd -literal -offset indent
+.Bd -literal -offset Ds
 $ pw show example.com | sed "1d; i\\\\
 > $(pw generate)
 > " | pw add -f example.com
@@ -138,7 +171,7 @@ $ pw show example.com | sed "1d; i\\\\
 .Pp
 Set git to perform binary diffs:
 .Pp
-.Bd -literal -offset indent
+.Bd -literal -offset Ds
 $ cd .pw
 $ cat > .gitattributes
 > *.tar diff=
@@ -148,7 +181,7 @@ $ cat > .gitattributes
 To import from
 .Nm password-store :
 .Pp
-.Bd -literal -offset indent
+.Bd -literal -offset Ds
 $ pw_unlock
 $ cd $HOME/.password-store
 $ for file in *.gpg; do
@@ -160,7 +193,7 @@ $ for file in *.gpg; do
 .Pp
 To batch edit all entries, e.g. to change an email:
 .Pp
-.Bd -literal -offset indent
+.Bd -literal -offset Ds
 $ pw_unlock
 $ pw ls | while read -r entry; do
 >	pw show "$entry" | sed 's/@example\\.com/@newaddress.com/' |
@@ -170,7 +203,7 @@ $ pw ls | while read -r entry; do
 .Pp
 To rotate your private key:
 .Pp
-.Bd -literal -offset indent
+.Bd -literal -offset Ds
 $ tar -cvf keybackup.tar $HOME/.keys
 $ PW_PRIVATE_KEY=$HOME/.keys/newkey.sec \\
 > PW_PUBLIC_KEY=$HOME/.keys/newkey.pub \\
