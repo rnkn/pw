@@ -6,10 +6,11 @@
 .Nd POSIX shell password manager
 .Sh SYNOPSIS
 .Nm
-.Op command
-.Op entry
+.Op Cm command
+.Op Fl flags
+.Op Ar entry
 .Nm
-.Op command
+.Op Cm command
 .Fl h
 .Sh DESCRIPTION
 The
@@ -17,92 +18,111 @@ The
 utility processes files ...
 .Bl -tag
 .It Cm init
-Initialize RSA key pair
+Initialize RSA key pair.
+Keys are created in locations specified by environment variables
+.Ev PW_PRIVATE_KEY
+and
+.Ev PW_PUBLIC_KEY
+.Pq see Sx ENVIRONMENT .
 .It Cm ls | Cm list Op query
 List entries matching
 .Op query
-or list all
-.It Cm add Op Fl fsv Xo
-.Ar entry
-.Xc
+or list all.
+.It Cm add Oo Fl fsv Oc Ar entry
 Add
 .Ar entry
-from STDIN or prompt for multiline text
-.Bl -tag -compact -width 10n
+from
+.Pa /dev/stdin
+or prompt for multiline text. Text entry is terminated with
+.Aq control-D
+on an empty line.
+.Bl -tag -compact
 .It Fl f
 force, overwrite existing
-.It Fl s
-create signature with private key
-.It Fl v
-verify against public key
-.El
-.It Cm show Op Fl cv Xo
-.Op Fl t
-.Op Fl k Ar field
-.Ar entry Xc
-Decrypt and show
 .Ar entry
-.Bl -tag -compact -width 10n
+.It Fl s
+create signature of
+.Ar entry
+with private key
+.It Fl v
+verify signature of
+.Ar entry
+with public key
+.El
+.It Cm show Oo Fl cv Oc Oo Fl t Oc Oo Fl k Ar field Oc Ar entry
+Decrypt and show
+.Ar entry .
+.Bl -tag -compact
 .It Fl c
-pipe to
+redirect output to
 .Ev PW_CLIP
 .It Fl v
-verify against signature with public key
+verify signature of
+.Ar entry
+with public key
 .It Fl t
-show TOTP
+show
+.Ar entry
+TOTP
 .Pq requires oathtool
 .It Fl k Ar field
 show value of
 .Ar field
+for
+.Ar entry
 .El
 .It Cm ed | Cm edit Ar entry
 Temporarily decrypt
 .Ar entry
 and edit in
-.Ev EDITOR
+.Ev EDITOR .
 .It Cm gen | Cm generate Op length
 Generate random password of
 .Op length
-.Pq default 16
+.Pq default 16 .
 .It Cm sign Ar entry
-Create signature for
+Create signature of
 .Ar entry
-with private key
+with private key.
 .It Cm verify Ar entry
-Verify
+Verify signature of
 .Ar entry
-against signature with public key
+with public key.
 .It Cm git Ar arguments
 Call git and pass
 .Ar arguments
-verbatim
+verbatim.
 .It Cm master
-Change private key passphrase
-.\" .Sh RETURN VALUES
-.\" For sections 2, 3, and 9 function return values only.
+Change private key passphrase.
 .Sh ENVIRONMENT
 All
 .Nm
 configuration is accomplished via environment variables:
 .Bl -tag
-.It Ev PW_PUBLIC_KEY
-location of public key
-.It Ev PW_PRIVATE_KEY
-location of private key
 .It Ev PW_DIR
-location of password directory
-.It Ev PW_MASTER
-private key password (see below)
+Location of password directory
+.Pq defaults to Pa $HOME/.pw .
+.It Ev PW_PRIVATE_KEY
+Location of private key
+.Pq defaults to Pa $HOME/.keys/pw.sec .
+.It Ev PW_PUBLIC_KEY
+Location of public key
+.Pq defaults to Pa $HOME/.keys/pw.pub .
 .It Ev PW_SIGN
-when set, sign password tarballs
+When set, create signatures for entry tarballs with private key.
 .It Ev PW_VERIFY
-when set, verify password tarballs
+When set, verify signatures of entry tarballs with public key.
 .It Ev PW_CLIP
-clipboard program name
+Clipboard command. Must be set for
+.Fl c
+to work.
+.It Ev PW_MASTER
+Private key password.
 .El
 .\" .Sh FILES
-.\" .Sh EXIT STATUS
-.\" For sections 1, 6, and 8 only.
+.Sh EXIT STATUS
+.Nm
+exits 0 on success and > 0 on error.
 .Sh EXAMPLES
 To add a generated password:
 .Pp
@@ -125,7 +145,8 @@ $ cat > .gitattributes
 > *.tar.sig diff=
 .Ed
 .Pp
-To import from `password-store`:
+To import from
+.Nm password-store :
 .Pp
 .Bd -literal -offset indent
 $ pw_unlock
@@ -168,13 +189,16 @@ $ rm -rf $HOME/.pw
 $ mv $HOME/.pw_new $HOME/.pw
 .Ed
 .Pp
-.\" .Sh SEE ALSO
-.\" .Xr foobar 1
+.Sh SEE ALSO
+.Xr openssl 1 ,
+.Xr random 4 ,
+.Xr oathtool 1 ,
+.Xr pass 1
 .\" .Sh STANDARDS
 .\" .Sh HISTORY
 .Sh AUTHOR
 .An Paul W. Rankin
-.Mt <pwr@bydasein.com>
+.Mt pwr@bydasein.com
 .\" .Sh CAVEATS
 .\" .Sh BUGS
 .\" .Sh SECURITY CONSIDERATIONS
