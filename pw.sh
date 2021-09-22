@@ -81,8 +81,7 @@ generate() {
 	[ "$opt" = h ] && generate_usage # exit
 	len="${1:-16}"
 	export LC_ALL=C
-	cat /dev/urandom | tr -cd '[:alnum:][:punct:]' | head -c "$len"
-	echo
+	cat /dev/urandom | tr -cd '[:alnum:][:punct:]' | fold -w "$len" | head -n 1
 }
 
 # sign_usage()
