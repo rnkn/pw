@@ -252,6 +252,11 @@ show() {
 	shift $(( OPTIND - 1 ))
 	pw_id="$1"
 	pw_tar="${pw_id}.tar"
+	pw_target=$(readlink "$pw_tar")
+	if [ -n "$pw_target" ]; then
+		pw_id="${pw_target%.tar}"
+		pw_tar="$pw_target"
+	fi
 	[ -f "$private_key" ] || fail "Private key not found"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "$pw_tar" ] || fail "$pw_id not found"
@@ -346,6 +351,26 @@ edit() {
 	rm "$workfile"
 }
 
+# link(pw_id, link)
+# create symbolic link between pw_id and link
+# return: 0
+link() {
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+create symbolic link for ENTRY
+usage: $program ln|link ENTRY LINK
+       $program -h
+EOF
+		(?)		exit 1 ;;
+	esac
+	pw_id="$1"; pw_ln="${2}.tar"
+	[ -n "$pw_id" ] || fail "Missing argument"
+	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
+	readlink "${1}.tar" > /dev/null && fail "$pw_id is already a link"
+	ln -si "${pw_id}.tar" "$pw_ln"
+}
+
 # pkey_master()
 # change private key passphrase
 # returns: 0
@@ -396,6 +421,7 @@ main() {
 		(ed|edit)		shift; edit "$@" ;;
 		(sign)			shift; sign "$@" ;;
 		(verify)		shift; verify "$@" ;;
+		(ln|link)		shift; link "$@";;
 		(gen|generate)	shift; generate "$@" ;;
 		(git)			"$@" ;;
 		(init)			pkey_init ;;
