@@ -384,9 +384,9 @@ EOF
 		(verify)		shift; verify "$@" ;;
 		(ln|link)		shift; link "$@";;
 		(gen|generate)	shift; generate "$@" ;;
-		(git)			"$@" ;;
 		(init)			shift; pkey_init "$@" ;;
 		(master)		shift; pkey_master "$@" ;;
+		(git)			"$@" ;;
 		(*)				show "$@" ;;
 	esac
 }
