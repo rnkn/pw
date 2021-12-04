@@ -142,8 +142,7 @@ EOF
 # returns: 0
 add() {
 	sign=0; verify=0; force=0
-	opts="fhsv"
-	while getopts "$opts" opt; do
+	while getopts fhsv opt; do
 		case "$opt" in
 			(h)	cat <<EOF; exit 1 ;;
 add ENTRY from stdin or prompt for multiline text
