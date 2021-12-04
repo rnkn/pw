@@ -31,6 +31,16 @@ fail() { echo "$1"; exit 1; }
 # create public key
 # returns: 0
 pkey_init() {
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+create private key located at:
+    $private_key
+create public key located at:
+    $public_key
+EOF
+		(?)		exit 1 ;;
+	esac
 	[ -f "$private_key" ] && fail "$private_key already exists"
 	[ -n "$PW_MASTER" ] && pkey_pass_args="-pass env:PW_MASTER"
 	echo "Generating private RSA key: $private_key"
@@ -60,50 +70,36 @@ print_env() {
 	exit
 }
 
-# generate_usage()
-# print generate subcommand usage
-# returns: 0
-generate_usage() {
-	cat <<EOF
-generate random password of LENGTH (default 16)
-usage:
-	$program generate [LENGTH]
-	$program generate -h
-EOF
-	exit
-}
-
 # generate(length)
 # returns: psuedo-random password of length (default 16)
 generate() {
-	opts='h'
-	getopts "$opts" opt
-	[ "$opt" = h ] && generate_usage # exit
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+generate random password of LENGTH (default 16)
+usage: $program gen|generate [LENGTH]
+       $program gen|generate -h
+EOF
+		(?)		exit 1 ;;
+	esac
 	len="${1:-16}"
 	export LC_ALL=C
 	cat /dev/urandom | tr -cd '[:alnum:][:punct:]' | fold -w "$len" | head -n 1
-}
-
-# sign_usage()
-# print sign subcommand usage
-# returns: 0
-sign_usage() {
-	cat <<EOF
-create signature for ENTRY with private key
-usage:
-	$program sign <ENTRY>
-	$program sign -h
-EOF
-	exit
 }
 
 # sign(data)
 # create signature from data
 # returns: 0
 sign() {
-	opts='h'
-	getopts "$opts" opt
-	[ "$opt" = h ] && sign_usage # exit
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+create signature for ENTRY with private key
+usage: $program sign <ENTRY>
+       $program sign -h
+EOF
+		(?)		exit 1 ;;
+	esac
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -115,26 +111,19 @@ sign() {
 	[ $? -eq 0 ] && echo "Created signature: $pw_sig"
 }
 
-# verify_usage()
-# print verify subcommand usage
-# returns: 0
-verify_usage() {
-	cat <<EOF
-verify ENTRY against signature with public key
-usage:
-	$program verify <ENTRY>
-	$program verify -h
-EOF
-	exit
-}
-
 # verify(pw_id)
 # verify PW_ID against signature with public key
 # returns: 0
 verify() {
-	opts='h'
-	getopts "$opts" opt
-	[ "$opt" = h ] && verify_usage # exit
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+verify ENTRY against signature with public key
+usage: $program verify <ENTRY>
+       $program verify -h
+EOF
+		(?)		exit 1 ;;
+	esac
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -147,19 +136,6 @@ verify() {
 	[ $? -eq 0 ] && echo "Verified signature: $pw_sig"
 }
 
-# add_usage()
-# print add subcommand usage
-# returns: 0
-add_usage() {
-	cat <<EOF
-add ENTRY from STDIN or prompt for multiline text
-usage:
-	 $program add [-fsv] <ENTRY>
-	 $program add -h
-EOF
-	exit
-}
-
 # add(pw_id)
 # create tar archive of encrypted password and AES key
 # create signature of tar archive
@@ -169,10 +145,15 @@ add() {
 	opts="fhsv"
 	while getopts "$opts" opt; do
 		case "$opt" in
-			(h)		add_usage ;; # exit
+			(h)		cat <<EOF; exit 1 ;;
+add ENTRY from stdin or prompt for multiline text
+usage: $program add [-fsv] <ENTRY>
+       $program add -h
+EOF
 			(f)		force=1 ;;
 			(s)		sign=1 ;;
 			(v)		verify=1 ;;
+			(?)		exit 1 ;;
 		esac
 	done
 	shift $(( OPTIND - 1 ))
@@ -221,32 +202,23 @@ get_field() {
 	sed -nE "/^${field}:/ s/.+:[ 	]*(.+)/\1/p"
 }
 
-# show_usage()
-# print show subcommand usage
-# returns: 0
-show_usage() {
-	cat <<EOF
-decrypt and show ENTRY or ENTRY FIELD or ENTRY TOTP
-usage:
-	$program show [-cstv] <ENTRY>
-	$program show [-csv] -k <FIELD> <ENTRY>
-	$program show -h
-EOF
-	exit
-}
-
 # show(pw_id)
 # returns: decrypted file contents
 show() {
 	copy=0; verify=0; totp=0
-	opts="chk:tv"
-	while getopts "$opts" opt; do
+	while getopts chk:tv opt; do
 		case "$opt" in
-			(h)		show_usage ;; # exit
+			(h)		cat <<EOF; exit 1 ;;
+decrypt and show ENTRY or ENTRY FIELD or ENTRY TOTP
+usage: $program show [-cstv] <ENTRY>
+       $program show [-csv] -k <FIELD> <ENTRY>
+       $program show -h
+EOF
 			(c)		copy=1 ;;
 			(k)		field="$OPTARG" ;;
 			(t)		field=totp ;;
 			(v)		verify=1 ;;
+			(?)		exit 1 ;;
 		esac
 	done
 	shift $(( OPTIND - 1 ))
@@ -293,48 +265,35 @@ show() {
 	rm -rf "$pw_workdir"
 }
 
-# list_usage()
-# print list subcommand usage
-# returns: 0
-list_usage() {
-	cat <<EOF
-list entries matching QUERY or list all
-usage:
-	$program list [QUERY]
-	$program list -h
-EOF
-	exit
-}
-
 # list(string)
 # returns: list of matching password IDs
 list() {
-	opts='h'
-	getopts "$opts" opt
-	[ "$opt" = h ] && list_usage # exit
-	[ -d "$pw_dir" ] || fail "$pw_dir not found"
-	find "$pw_dir" -type f -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' | sort
-}
-
-# edit_usage()
-# print edit subcommand usage
-# returns: 0
-edit_usage() {
-	cat <<EOF
-temporarily decrypt ENTRY and edit in EDITOR
-usage:
-	$program edit <ENTRY>
-	$program edit -h
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+list entries matching QUERY or list all
+usage: $program ls|list [QUERY]
+       $program ls|list -h
 EOF
-	exit
+		(?)		exit 1 ;;
+	esac
+	[ -d "$pw_dir" ] || fail "$pw_dir not found"
+	find "$pw_dir" -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' |
+		sort
 }
 
 # edit(pw_id)
 # returns: 0
 edit() {
-	opts='h'
-	getopts "$opts" opt
-	[ "$opt" = h ] && edit_usage # exit
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+temporarily decrypt ENTRY and edit in EDITOR
+usage: $program edit <ENTRY>
+       $program edit -h
+EOF
+		(?)		exit 1 ;;
+	esac
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
@@ -375,6 +334,16 @@ EOF
 # change private key passphrase
 # returns: 0
 pkey_master() {
+	getopts h opt
+	case "$opt" in
+		(h)		cat <<EOF; exit 1 ;;
+change passphrase for private key located at:
+    $private_key
+usage: $program master
+       $program master -h
+EOF
+		(?)		exit 1 ;;
+	esac
 	[ -f "$private_key" ] || fail "Private key not found"
 	workkey=$(mktemp -t pw_work); trap "rm -f $workkey" EXIT
 	chmod 0600 "$private_key"
@@ -384,32 +353,24 @@ pkey_master() {
 	chmod 0400 "$private_key"
 }
 
-# main_usage()
-# print program usage
-# returns: 0
-main_usage() {
-	cat <<EOF
-usage:
-	$program [-E] [-h] [-v]
-	$program <COMMAND>
-	commands: init list add show edit sign verify generate master
-EOF
-	exit
-}
-
 # main()
 # with option, call appropriate function and exit
 # with subcommand, call subcommand function
 # without subcommand, call show()
 # returns: 0
 main() {
-	opts=':Ehv'
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
-	while getopts "$opts" opt; do
+	while getopts Ehv opt; do
 		case "$opt" in
-			(E)			print_env ;;
-			(h)			main_usage ;;
-			(v)			echo "$program v$version"; exit ;;
+			(h)		cat <<EOF ; exit 1 ;;
+usage: $program [-E] [-h] [-v]
+       $program <COMMAND>
+       $program <COMMAND> -h
+       commands: init list add show edit sign verify generate master
+EOF
+			(E)		print_env ;;
+			(v)		echo "$program v$version"; exit 1 ;;
+			(?)		exit 1 ;;
 		esac
 	done
 	OPTIND=0
@@ -424,8 +385,8 @@ main() {
 		(ln|link)		shift; link "$@";;
 		(gen|generate)	shift; generate "$@" ;;
 		(git)			"$@" ;;
-		(init)			pkey_init ;;
-		(master)		pkey_master ;;
+		(init)			shift; pkey_init "$@" ;;
+		(master)		shift; pkey_master "$@" ;;
 		(*)				show "$@" ;;
 	esac
 }
