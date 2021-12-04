@@ -359,7 +359,7 @@ EOF
 # returns: 0
 main() {
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
-	while getopts Ehv opt; do
+	while getopts :Ehv opt; do
 		case "$opt" in
 			(h)	cat <<EOF ; exit 1 ;;
 usage: $program [-E] [-h] [-v]
@@ -369,7 +369,7 @@ usage: $program [-E] [-h] [-v]
 EOF
 			(E)	print_env ;;
 			(v)	echo "$program v$version"; exit 1 ;;
-			(?)	exit 1 ;;
+			(:)	exit 1 ;;
 		esac
 	done
 	OPTIND=0
