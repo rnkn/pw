@@ -33,13 +33,13 @@ fail() { echo "$1"; exit 1; }
 pkey_init() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 create private key located at:
     $private_key
 create public key located at:
     $public_key
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	[ -f "$private_key" ] && fail "$private_key already exists"
 	[ -n "$PW_MASTER" ] && pkey_pass_args="-pass env:PW_MASTER"
@@ -75,12 +75,12 @@ print_env() {
 generate() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 generate random password of LENGTH (default 16)
 usage: $program gen|generate [LENGTH]
        $program gen|generate -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	len="${1:-16}"
 	export LC_ALL=C
@@ -93,12 +93,12 @@ EOF
 sign() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 create signature for ENTRY with private key
 usage: $program sign <ENTRY>
        $program sign -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	pw_id="$1"
 	pw_tar="${1}.tar"
@@ -117,12 +117,12 @@ EOF
 verify() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 verify ENTRY against signature with public key
 usage: $program verify <ENTRY>
        $program verify -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	pw_id="$1"
 	pw_tar="${1}.tar"
@@ -145,15 +145,15 @@ add() {
 	opts="fhsv"
 	while getopts "$opts" opt; do
 		case "$opt" in
-			(h)		cat <<EOF; exit 1 ;;
+			(h)	cat <<EOF; exit 1 ;;
 add ENTRY from stdin or prompt for multiline text
 usage: $program add [-fsv] <ENTRY>
        $program add -h
 EOF
-			(f)		force=1 ;;
-			(s)		sign=1 ;;
-			(v)		verify=1 ;;
-			(?)		exit 1 ;;
+			(f)	force=1 ;;
+			(s)	sign=1 ;;
+			(v)	verify=1 ;;
+			(?)	exit 1 ;;
 		esac
 	done
 	shift $(( OPTIND - 1 ))
@@ -214,11 +214,11 @@ usage: $program show [-cstv] <ENTRY>
        $program show [-csv] -k <FIELD> <ENTRY>
        $program show -h
 EOF
-			(c)		copy=1 ;;
-			(k)		field="$OPTARG" ;;
-			(t)		field=totp ;;
-			(v)		verify=1 ;;
-			(?)		exit 1 ;;
+			(c)	copy=1 ;;
+			(k)	field="$OPTARG" ;;
+			(t)	field=totp ;;
+			(v)	verify=1 ;;
+			(?)	exit 1 ;;
 		esac
 	done
 	shift $(( OPTIND - 1 ))
@@ -270,12 +270,12 @@ EOF
 list() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 list entries matching QUERY or list all
 usage: $program ls|list [QUERY]
        $program ls|list -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	[ -d "$pw_dir" ] || fail "$pw_dir not found"
 	find "$pw_dir" -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' |
@@ -287,12 +287,12 @@ EOF
 edit() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 temporarily decrypt ENTRY and edit in EDITOR
 usage: $program edit <ENTRY>
        $program edit -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
@@ -316,12 +316,12 @@ EOF
 link() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 create symbolic link for ENTRY
 usage: $program ln|link ENTRY LINK
        $program -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	pw_id="$1"; pw_ln="${2}.tar"
 	[ -n "$pw_id" ] || fail "Missing argument"
@@ -336,13 +336,13 @@ EOF
 pkey_master() {
 	getopts h opt
 	case "$opt" in
-		(h)		cat <<EOF; exit 1 ;;
+		(h)	cat <<EOF; exit 1 ;;
 change passphrase for private key located at:
     $private_key
 usage: $program master
        $program master -h
 EOF
-		(?)		exit 1 ;;
+		(?)	exit 1 ;;
 	esac
 	[ -f "$private_key" ] || fail "Private key not found"
 	workkey=$(mktemp -t pw_work); trap "rm -f $workkey" EXIT
@@ -362,15 +362,15 @@ main() {
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
 	while getopts Ehv opt; do
 		case "$opt" in
-			(h)		cat <<EOF ; exit 1 ;;
+			(h)	cat <<EOF ; exit 1 ;;
 usage: $program [-E] [-h] [-v]
        $program <COMMAND>
        $program <COMMAND> -h
        commands: init list add show edit sign verify generate master
 EOF
-			(E)		print_env ;;
-			(v)		echo "$program v$version"; exit 1 ;;
-			(?)		exit 1 ;;
+			(E)	print_env ;;
+			(v)	echo "$program v$version"; exit 1 ;;
+			(?)	exit 1 ;;
 		esac
 	done
 	OPTIND=0
