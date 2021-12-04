@@ -131,8 +131,8 @@ EOF
 	[ -f "$pw_tar" ] || fail "$pw_id not found"
 	[ -f "$pw_sig" ] || fail "$pw_id signature not found"
 	openssl dgst -sha256 -binary < "$pw_tar" |
-		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$pw_sig" >/dev/null 2>&1 ||
-		fail "Verification failure: $pw_id"
+		openssl pkeyutl -verify -inkey "$public_key" -pubin -sigfile "$pw_sig" \
+				>/dev/null 2>&1 || fail "Verification failure: $pw_id"
 	[ $? -eq 0 ] && echo "Verified signature: $pw_sig"
 }
 
@@ -185,7 +185,7 @@ EOF
 	if [ -n "$PW_VERIFY" ] || [ "$verify" -eq 1 ]; then
 		verify "$pw_id"
 	fi
-    echo "Encryption succeeded: $pw_id"
+	echo "Encryption succeeded: $pw_id"
 }
 
 # copy(stdin)
