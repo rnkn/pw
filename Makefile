@@ -3,7 +3,7 @@ SRC		= pw.sh
 MAN		= pw.1
 BIN		= pw
 PREFIX		= /usr/local
-MANPREFIX	= ${PREFIX}/man
+MANPREFIX	= ${PREFIX}/share/man
 
 install:
 	@mkdir -p ${PREFIX}/bin
