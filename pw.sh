@@ -31,16 +31,17 @@ fail() { echo "$1"; exit 1; }
 # create public key
 # returns: 0
 pkey_init() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 create private key located at:
     $private_key
 create public key located at:
     $public_key
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	[ -f "$private_key" ] && fail "$private_key already exists"
 	[ -n "$PW_MASTER" ] && pkey_pass_args="-pass env:PW_MASTER"
 	echo "Generating private RSA key: $private_key"
@@ -67,21 +68,21 @@ print_env() {
 	printf "$format" PW_SIGN "${PW_SIGN:--}"
 	printf "$format" PW_VERIFY "${PW_VERIFY:--}"
 	printf "$format" PW_CLIP "${PW_CLIP:--}"
-	exit
 }
 
 # generate(length)
 # returns: psuedo-random password of length (default 16)
 generate() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 generate random password of LENGTH (default 16)
 usage: $program gen|generate [LENGTH]
        $program gen|generate -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	len="${1:-16}"
 	export LC_ALL=C
 	cat /dev/urandom | tr -cd '[:alnum:][:punct:]' | fold -w "$len" | head -n 1
@@ -91,15 +92,16 @@ EOF
 # create signature from data
 # returns: 0
 sign() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 create signature for ENTRY with private key
 usage: $program sign <ENTRY>
        $program sign -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -115,15 +117,16 @@ EOF
 # verify PW_ID against signature with public key
 # returns: 0
 verify() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 verify ENTRY against signature with public key
 usage: $program verify <ENTRY>
        $program verify -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	pw_id="$1"
 	pw_tar="${1}.tar"
 	pw_sig="${pw_tar}.sig"
@@ -142,7 +145,7 @@ EOF
 # returns: 0
 add() {
 	sign=0; verify=0; force=0
-	while getopts fhsv opt; do
+	while getopts hfsv opt; do
 		case "$opt" in
 			(h)	cat <<EOF; exit 1 ;;
 add ENTRY from stdin or prompt for multiline text
@@ -205,7 +208,7 @@ get_field() {
 # returns: decrypted file contents
 show() {
 	copy=0; verify=0; totp=0
-	while getopts chk:tv opt; do
+	while getopts hcvtk: opt; do
 		case "$opt" in
 			(h)		cat <<EOF; exit 1 ;;
 decrypt and show ENTRY or ENTRY FIELD or ENTRY TOTP
@@ -214,9 +217,9 @@ usage: $program show [-cstv] <ENTRY>
        $program show -h
 EOF
 			(c)	copy=1 ;;
+			(v)	verify=1 ;;
 			(k)	field="$OPTARG" ;;
 			(t)	field=totp ;;
-			(v)	verify=1 ;;
 			(?)	exit 1 ;;
 		esac
 	done
@@ -267,15 +270,16 @@ EOF
 # list(string)
 # returns: list of matching password IDs
 list() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 list entries matching QUERY or list all
 usage: $program ls|list [QUERY]
        $program ls|list -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	[ -d "$pw_dir" ] || fail "$pw_dir not found"
 	find "$pw_dir" -maxdepth 1 -name "*${1}*.tar" | sed 's/.*\///; s/\.tar$//' |
 		sort
@@ -284,15 +288,16 @@ EOF
 # edit(pw_id)
 # returns: 0
 edit() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 temporarily decrypt ENTRY and edit in EDITOR
 usage: $program edit <ENTRY>
        $program edit -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	pw_id="$1"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
@@ -313,15 +318,16 @@ EOF
 # create symbolic link between pw_id and link
 # return: 0
 link() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 create symbolic link for ENTRY
 usage: $program ln|link ENTRY LINK
        $program -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	pw_id="$1"; pw_ln="${2}.tar"
 	[ -n "$pw_id" ] || fail "Missing argument"
 	[ -f "${pw_id}.tar" ] || fail "$pw_id not found"
@@ -333,16 +339,17 @@ EOF
 # change private key passphrase
 # returns: 0
 pkey_master() {
-	getopts h opt
-	case "$opt" in
-		(h)	cat <<EOF; exit 1 ;;
+	if getopts h opt; then
+		case "$opt" in
+			(h)	cat <<EOF; exit 1 ;;
 change passphrase for private key located at:
     $private_key
 usage: $program master
        $program master -h
 EOF
-		(?)	exit 1 ;;
-	esac
+			(?)	exit 1 ;;
+		esac
+	fi
 	[ -f "$private_key" ] || fail "Private key not found"
 	workkey=$(mktemp -t pw_work); trap "rm -f $workkey" EXIT
 	chmod 0600 "$private_key"
@@ -359,15 +366,15 @@ EOF
 # returns: 0
 main() {
 	cd "$pw_dir" 2>/dev/null || fail "$pw_dir not found or PW_DIR not set"
-	while getopts :Ehv opt; do
+	while getopts :hEv opt; do
 		case "$opt" in
-			(h)	cat <<EOF ; exit 1 ;;
+			(h)	cat <<EOF; exit 1 ;;
 usage: $program [-E] [-h] [-v]
        $program <COMMAND>
        $program <COMMAND> -h
        commands: init list add show edit sign verify generate master
 EOF
-			(E)	print_env ;;
+			(E)	print_env; exit 1 ;;
 			(v)	echo "$program v$version"; exit 1 ;;
 			(:)	exit 1 ;;
 		esac
